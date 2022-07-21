@@ -1,0 +1,142 @@
+.blockInsert {
+  position: relative;
+  display: flex;
+  // flex-wrap: wrap;
+  width: 100%;
+  height: 700px;
+
+  .diagram-component {
+    // width: 80%;
+    height: 100%;
+    flex-grow: 1;
+    border: 1px solid black;
+  }
+
+  .overview-component {
+    z-index: 99;
+    position: absolute;
+    right: 300px;
+    top: 0;
+    width: 150px;
+    height: 100px;
+    background-color: aliceblue;
+    border: 1px solid black;
+  }
+
+  .blockInsertBox {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .blockInsertBoxTitle {
+      margin-bottom: 10px;
+    }
+    select {
+      text-align: center;
+      width: 80%;
+    }
+
+    .blockSampleCom {
+      margin-top: 20px;
+      border: 2px solid black;
+      border-radius: 5px;
+      width: 125px;
+
+      div {
+        font-size: 10px;
+        font-family: helvetica, arial, sans-serif;
+      }
+
+      .blockSampleKey {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 25px;
+      }
+
+      .blockSampleTitle {
+        text-align: center;
+        margin: 0 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 75px;
+        word-break: break-all;
+      }
+
+      .blockSampleDate {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-top: 1px solid black;
+        border-bottom: 1px solid black;
+        height: 25px;
+      }
+
+      .blockSampleDateBox {
+        display: flex;
+
+        .blockSampleDateBoxDate {
+          width: 90px;
+          border-right: 1px solid black;
+
+          div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 25px;
+          }
+        }
+        .blockSampleDateBoxDuration {
+          width: 35px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .blockSampleDateBoxDate.actual {
+          border-radius: 0 0 0 10px;
+        }
+
+        .blockSampleDateBoxDateTop {
+          width: 125px;
+
+          div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 25px;
+          }
+        }
+      }
+    }
+
+    .blockDataInsertBox {
+      margin-top: 20px;
+      width: 280px;
+
+      .blockDataInsert {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 10px;
+
+        .blockDataInsertTitle {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+.buttonBox9 {
+  z-index: 99;
+  position: absolute;
+  left: 5px;
+  bottom: -50px;
+}
+
+button {
+  margin-right: 10px;
+}

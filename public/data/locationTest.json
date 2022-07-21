@@ -1,0 +1,69 @@
+{
+  "class": "GraphLinksModel",
+  "nodeDataArray": [
+    {
+      "category": "Low",
+      "uuu_P6ActivityName": "",
+      "planDate": "Plan Date",
+      "ddd_evm_plan_start": "",
+      "ddd_evm_plan_finish": "",
+      "uuu_P6PlannedDuration": "",
+      "actualDate": "Actual Date",
+      "ddd_evm_actual_start": "",
+      "ddd_evm_actual_finish": "",
+      "uuu_P6ActualDuration": "",
+      "key": "a",
+      "loc": "12.491892499153963 -18.20819142418587"
+    },
+    {
+      "category": "Low",
+      "uuu_P6ActivityName": "",
+      "planDate": "Plan Date",
+      "ddd_evm_plan_start": "",
+      "ddd_evm_plan_finish": "",
+      "uuu_P6PlannedDuration": "",
+      "actualDate": "Actual Date",
+      "ddd_evm_actual_start": "",
+      "ddd_evm_actual_finish": "",
+      "uuu_P6ActualDuration": "",
+      "key": "aa",
+      "loc": "250.2842712474619 119.41290232581413"
+    },
+    {
+      "key": "aaaaa",
+      "category": "Low",
+      "uuu_P6ActivityName": "",
+      "planDate": "Plan Date",
+      "ddd_evm_plan_start": "",
+      "ddd_evm_plan_finish": "",
+      "uuu_P6PlannedDuration": "",
+      "actualDate": "Actual Date",
+      "ddd_evm_actual_start": "",
+      "ddd_evm_actual_finish": "",
+      "uuu_P6ActualDuration": "",
+      "loc": "18.96484375 297.9765625"
+    }
+  ],
+  "linkDataArray": [
+    {
+      "from": "a",
+      "to": "aa",
+      "points": [
+        89.25331624830793, -18.20819142418587, 99.25331624830793,
+        -18.20819142418587, 131.38808187330793, -18.20819142418587,
+        131.38808187330793, 119.41290232581414, 163.52284749830793,
+        119.41290232581414, 173.52284749830793, 119.41290232581414
+      ]
+    },
+    {
+      "from": "aaaaa",
+      "to": "aa",
+      "points": [
+        95.72626749915396, 297.9765625, 105.72626749915396, 297.9765625,
+        134.62455749873095, 297.9765625, 134.62455749873095, 119.41290232581414,
+        163.52284749830795, 119.41290232581414, 173.52284749830795,
+        119.41290232581414
+      ]
+    }
+  ]
+}
