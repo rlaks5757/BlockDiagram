@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import * as go from "gojs";
 import { ReactDiagram, ReactOverview } from "gojs-react";
 import moment from "moment";
@@ -8,41 +9,15 @@ import TopCardInsert from "./ComCardInsert/TopCardInsert";
 import axios from "axios";
 
 const BlockInsert = () => {
+  const params = useParams();
   const [comOriginalData, setComOriginalData] = useState([]);
   const [topOriginalData, setTopOriginalData] = useState([]);
-  const [modelData, setModalDate] = useState({
-    class: "GraphLinksModel",
-    nodeDataArray: [],
-    linkDataArray: [],
-  });
 
   const [insertDataToggle, setInsertDataToogle] = useState(true);
 
-  const [insertData, setInsertData] = useState({
-    key: "",
-    category: "Low",
-    uuu_P6ActivityName: "",
-    planDate: "Plan Date",
-    ddd_evm_plan_start: "",
-    ddd_evm_plan_finish: "",
-    uuu_P6PlannedDuration: "",
-    actualDate: "Actual Date",
-    ddd_evm_actual_start: "",
-    ddd_evm_actual_finish: "",
-    uuu_P6ActualDuration: "",
-    record_no: "",
-  });
+  const [insertData, setInsertData] = useState(baseInsertComData);
 
-  const [insertTopData, setInsertTopData] = useState({
-    key: "",
-    category: "Top",
-    uuu_P6ActivityName: "",
-    planDate: "Plan Date",
-    ddd_evm_plan_start: "",
-    actualDate: "Actual Date",
-    ddd_evm_actual_start: "",
-    record_no: "",
-  });
+  const [insertTopData, setInsertTopData] = useState(baseInsertTopData);
 
   const diagramRef = useRef();
 
@@ -1018,27 +993,18 @@ const BlockInsert = () => {
 
         const diagram = await diagramRef.current?.getDiagram();
 
-        const comFetchData = await axios.get("/data/commissioning.json");
-        const comData = await comFetchData.data.data;
-        const comDeletdItem = [];
+        const fetchData = await axios.get(
+          `http://localhost:8000/blockInfo/${params.id}`
+        );
 
-        await comData.forEach((com) => {
-          if (com.status === "Deleted") {
-            comDeletdItem.push(com.uuu_P6ActivityId);
-          }
-        });
+        const comData = await fetchData.data.com;
+        console.log(comData);
+        console.log(baseSet);
 
         await setComOriginalData(comData);
 
         const topFetchData = await axios.get("/data/top.json");
         const topData = await topFetchData.data.data;
-        const topDeletdItem = [];
-
-        topData.forEach((com) => {
-          if (com.status === "Deleted") {
-            topDeletdItem.push(com.dtsTOPCode);
-          }
-        });
 
         await setTopOriginalData(topData);
 
@@ -1046,7 +1012,7 @@ const BlockInsert = () => {
           if (com.status !== "Deleted") {
             baseSet.nodeDataArray.push({
               key: com.uuu_P6ActivityId,
-              category: "Low",
+              category: com.dtsDashBlockCategory,
               uuu_P6ActivityName: com.uuu_P6ActivityName,
               planDate: "Plan Date",
               ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
@@ -1068,6 +1034,7 @@ const BlockInsert = () => {
                   ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
                   : null,
               uuu_P6ActualDuration: com.uuu_P6ActualDuration,
+              loc: com.dtsDashCoordinates,
               record_no: com.record_no,
             });
           }
@@ -1075,20 +1042,16 @@ const BlockInsert = () => {
 
         await comData.forEach((com) => {
           if (com.status !== "Deleted") {
-            if (com._bp_lineitems.length > 0) {
-              com._bp_lineitems.forEach((com2) => {
-                if (com2.dtsPredSuccSRB === "Predecessor") {
+            if (com._bp_lineitems !== undefined) {
+              if (com._bp_lineitems.length > 0) {
+                com._bp_lineitems.forEach((com2) => {
                   baseSet.linkDataArray.push({
                     from: com.uuu_P6ActivityId,
-                    to: com2.uuu_P6ActivityId,
+                    to: com2.dtsCommActivityBPK,
+                    dtsLineAutoSeq: com2.dtsLineAutoSeq,
                   });
-                } else {
-                  baseSet.linkDataArray.push({
-                    from: com2.uuu_P6ActivityId,
-                    to: com.uuu_P6ActivityId,
-                  });
-                }
-              });
+                });
+              }
             }
           }
         });
@@ -1121,28 +1084,12 @@ const BlockInsert = () => {
                 baseSet.linkDataArray.push({
                   from: com.dtsTOPCode,
                   to: com2.uuu_P6ActivityId,
+                  dtsLineAutoSeq: com2.dtsLineAutoSeq,
                 });
               });
             }
           }
         });
-
-        const deleteditemConcat = await comDeletdItem.concat(topDeletdItem);
-
-        const linkDataFilter = await baseSet.linkDataArray.filter(
-          (arr, index, callback) =>
-            index ===
-            callback.findIndex((t) => t.from === arr.from && t.to === arr.to)
-        );
-
-        let difference = await linkDataFilter.filter((x) => {
-          return (
-            !deleteditemConcat.includes(x.to) &&
-            !deleteditemConcat.includes(x.from)
-          );
-        });
-
-        baseSet.linkDataArray = difference;
 
         diagram.model = go.Model.fromJson(JSON.stringify(baseSet));
       } catch (err) {
@@ -1151,78 +1098,7 @@ const BlockInsert = () => {
     };
 
     commissionFetch();
-  }, []);
-
-  const save = () => {
-    const diagram = diagramRef.current?.getDiagram();
-
-    setModalDate({
-      ...modelData,
-      nodeDataArray: JSON.parse(diagram.model.toJson()).nodeDataArray,
-      linkDataArray: JSON.parse(diagram.model.toJson()).linkDataArray,
-    });
-    diagram.isModified = false;
-
-    console.log(JSON.parse(diagram.model.toJson()));
-  };
-
-  const load = () => {
-    const diagram = diagramRef.current?.getDiagram();
-    diagram.model = go.Model.fromJson(JSON.stringify(modelData));
-  };
-
-  const filtering = (e) => {
-    const diagram = diagramRef.current?.getDiagram();
-
-    if (e.target.name === "reset") {
-      diagram.model = go.Model.fromJson(JSON.stringify(modelData));
-    } else {
-      let filteringModel = { ...modelData };
-      const filterNodeDataArray = modelData.nodeDataArray.filter((com) => {
-        return com.category === e.target.name;
-      });
-
-      filteringModel.nodeDataArray = filterNodeDataArray;
-
-      const linkFilterArray = modelData.nodeDataArray.filter((com) => {
-        return com.category !== e.target.name;
-      });
-
-      const test0 = linkFilterArray.map((com) => com.key);
-
-      const test1 = modelData.linkDataArray.filter((com) => {
-        return test0.some((com2) => {
-          return com.to === com2;
-        });
-      });
-
-      const test2 = modelData.linkDataArray.filter((com) => {
-        return test0.some((com2) => {
-          return com.from === com2;
-        });
-      });
-
-      const totalTest = [];
-
-      test1.map((com) => {
-        return totalTest.push(com);
-      });
-
-      test2.map((com) => {
-        return totalTest.push(com);
-      });
-
-      const totalTestResult = [...new Set(totalTest)];
-
-      const linkDataArrayResult = [...modelData.linkDataArray].filter(
-        (com) => !totalTestResult.includes(com)
-      );
-
-      filteringModel.linkDataArray = linkDataArrayResult;
-
-      diagram.model = go.Model.fromJson(JSON.stringify(filteringModel));
-    }
-  };
+  }, [params]);
 
   const handleInsertData = (e) => {
     const { value, name } = e.target;
@@ -1308,46 +1184,20 @@ const BlockInsert = () => {
       insertNodeData.nodeDataArray.push(insertTopData);
       diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
     }
-    setInsertData(() => {
-      return {
-        key: "",
-        category: "Low",
-        uuu_P6ActivityName: "",
-        planDate: "Plan Date",
-        ddd_evm_plan_start: "",
-        ddd_evm_plan_finish: "",
-        uuu_P6PlannedDuration: "",
-        actualDate: "Actual Date",
-        ddd_evm_actual_start: "",
-        ddd_evm_actual_finish: "",
-        uuu_P6ActualDuration: "",
-        record_no: "",
-      };
-    });
+    setInsertData(baseInsertComData);
 
-    setInsertTopData(() => {
-      return {
-        key: "",
-        category: "Top",
-        uuu_P6ActivityName: "",
-        planDate: "Plan Date",
-        ddd_evm_plan_start: "",
-        actualDate: "Actual Date",
-        ddd_evm_actual_start: "",
-        record_no: "",
-      };
-    });
+    setInsertTopData(baseInsertTopData);
   };
 
-  const finalDataSave = () => {
-    const diagram = diagramRef.current?.getDiagram();
+  const finalDataSave = async () => {
+    const diagram = await diagramRef.current?.getDiagram();
 
-    const insertNodeData = JSON.parse(diagram.model.toJson());
+    const insertNodeData = await JSON.parse(diagram.model.toJson());
 
     let comData = [];
     let topData = [];
 
-    insertNodeData.nodeDataArray.forEach((com) => {
+    await insertNodeData.nodeDataArray.forEach((com) => {
       if (com.category === "Top") {
         topData.push({
           dtsTOPCode: com.key,
@@ -1429,79 +1279,252 @@ const BlockInsert = () => {
       }
     });
 
-    comData.forEach((com) => {
+    await comData.forEach((com) => {
       insertNodeData.linkDataArray.forEach((com2) => {
         if (com.uuu_P6ActivityId === com2.from) {
-          com._bp_lineitems.push({
-            dtsPredSuccSRB: "Predecessor",
-            uuu_P6ActivityId: com2.to,
-            dtsDashCoordinates: com2.points.join(),
-            short_desc: "1",
-            uuu_P6ActivityName: insertNodeData.nodeDataArray.filter((com3) => {
-              return com3.key === com2.to;
-            })[0]["uuu_P6ActivityName"],
-          });
-        } else if (com.uuu_P6ActivityId === com2.to) {
-          com._bp_lineitems.push({
-            dtsPredSuccSRB: "Successor",
-            uuu_P6ActivityId: com2.from,
-            dtsDashCoordinates: com2.points.join(),
-            short_desc: "1",
-            uuu_P6ActivityName: insertNodeData.nodeDataArray.filter((com3) => {
-              return com3.key === com2.from;
-            })[0]["uuu_P6ActivityName"],
-          });
+          if (com2.dtsLineAutoSeq !== undefined) {
+            com._bp_lineitems.push({
+              dtsCommActivityBPK: com2.to,
+              dtsDashCoordinates: com2.points.join(),
+              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
+                (com3) => {
+                  return com3.key === com2.to;
+                }
+              )[0]["uuu_P6ActivityName"],
+              dtsLineAutoSeq: com2.dtsLineAutoSeq,
+              short_desc: "1",
+            });
+          } else {
+            com._bp_lineitems.push({
+              dtsCommActivityBPK: com2.to,
+              dtsDashCoordinates: com2.points.join(),
+              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
+                (com3) => {
+                  return com3.key === com2.to;
+                }
+              )[0]["uuu_P6ActivityName"],
+              dtsLineAutoSeq: "99999",
+              short_desc: "1",
+            });
+          }
         }
       });
     });
 
-    topData.forEach((com) => {
+    await topData.forEach((com) => {
       insertNodeData.linkDataArray.forEach((com2) => {
-        if (com.dtsTOPCode === com2.from) {
-          com._bp_lineitems.push({
-            uuu_P6ActivityId: com2.to,
-            dtsDashCoordinates: com2.points.join(),
-            short_desc: "1",
-            uuu_P6ActivityName: insertNodeData.nodeDataArray.filter((com3) => {
-              return com3.key === com2.to;
-            })[0]["uuu_P6ActivityName"],
-          });
-        } else if (com.dtsTOPCode === com2.to) {
-          com._bp_lineitems.push({
-            uuu_P6ActivityId: com2.from,
-            dtsDashCoordinates: com2.points.join(),
-            short_desc: "1",
-            uuu_P6ActivityName: insertNodeData.nodeDataArray.filter((com3) => {
-              return com3.key === com2.from;
-            })[0]["uuu_P6ActivityName"],
-          });
+        if (com.uuu_P6ActivityId === com2.from) {
+          if (com2.dtsLineAutoSeq !== undefined) {
+            com._bp_lineitems.push({
+              dtsCommActivityBPK: com2.to,
+              dtsDashCoordinates: com2.points.join(),
+              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
+                (com3) => {
+                  return com3.key === com2.to;
+                }
+              )[0]["uuu_P6ActivityName"],
+              dtsLineAutoSeq: com2.dtsLineAutoSeq,
+              short_desc: "1",
+            });
+          } else {
+            com._bp_lineitems.push({
+              dtsCommActivityBPK: com2.to,
+              dtsDashCoordinates: com2.points.join(),
+              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
+                (com3) => {
+                  return com3.key === com2.to;
+                }
+              )[0]["uuu_P6ActivityName"],
+              dtsLineAutoSeq: "99999",
+              short_desc: "1",
+            });
+          }
         }
       });
     });
 
-    const noneDeleteItem = insertNodeData.nodeDataArray.map((com) => {
+    const noneDeleteItem = await insertNodeData.nodeDataArray.map((com) => {
       return com.key;
     });
 
-    const comDifference = comOriginalData.filter(
+    const comDifference = await comOriginalData.filter(
       (x) => !noneDeleteItem.includes(x.uuu_P6ActivityId)
     );
 
-    const comDeleteitemChange = comDifference.map((com) => {
+    const comDeleteitemChange = await comDifference.map((com) => {
       return { ...com, status: "Deleted" };
     });
 
-    const topDifference = topOriginalData.filter(
+    const topDifference = await topOriginalData.filter(
       (x) => !noneDeleteItem.includes(x.dtsTOPCode)
     );
 
-    const topDeleteitemChange = topDifference.map((com) => {
+    const topDeleteitemChange = await topDifference.map((com) => {
       return { ...com, status: "Deleted" };
     });
 
-    const finalComData = comData.concat(comDeleteitemChange);
-    const finalTopData = topData.concat(topDeleteitemChange);
+    const finalComData = await comData.concat(comDeleteitemChange);
+    const finalTopData = await topData.concat(topDeleteitemChange);
+
+    const fetchData = await axios.get(
+      `http://localhost:8000/blockInfo/${params.id}`
+    );
+
+    const lastestComFetchData = await fetchData.data.com;
+
+    const originalComdata = [];
+
+    await lastestComFetchData.forEach((com) => {
+      if (com._bp_lineitems !== undefined) {
+        originalComdata.push({
+          record_no: com.record_no,
+          _bp_lineitems: com._bp_lineitems.map((com2) => com2.dtsLineAutoSeq),
+        });
+      } else {
+        originalComdata.push({
+          record_no: com.record_no,
+          _bp_lineitems: [],
+        });
+      }
+    });
+
+    const fixedComdata = [];
+
+    await finalComData.forEach((com) => {
+      if (com._bp_lineitems !== undefined) {
+        fixedComdata.push({
+          record_no: com.record_no,
+          _bp_lineitems: com._bp_lineitems.map((com2) => com2.dtsLineAutoSeq),
+        });
+      } else {
+        fixedComdata.push({
+          record_no: com.record_no,
+          _bp_lineitems: [],
+        });
+      }
+    });
+
+    const deleteComFinal = [];
+
+    await originalComdata.forEach((com) =>
+      fixedComdata.forEach((com2) => {
+        if (com.record_no === com2.record_no) {
+          deleteComFinal.push({
+            record_no: com.record_no,
+            _bp_lineitems: com._bp_lineitems.filter(
+              (x) => !com2._bp_lineitems.includes(x)
+            ),
+          });
+        }
+      })
+    );
+
+    const originalTopdata = [];
+
+    await topOriginalData.forEach((com) => {
+      if (com._bp_lineitems !== undefined) {
+        originalTopdata.push({
+          record_no: com.record_no,
+          _bp_lineitems: com._bp_lineitems.map((com2) => com2.dtsLineAutoSeq),
+        });
+      } else {
+        originalTopdata.push({
+          record_no: com.record_no,
+          _bp_lineitems: [],
+        });
+      }
+    });
+
+    const fixedTopdata = [];
+
+    await finalTopData.forEach((com) => {
+      if (com._bp_lineitems !== undefined) {
+        fixedTopdata.push({
+          record_no: com.record_no,
+          _bp_lineitems: com._bp_lineitems.map((com2) => com2.dtsLineAutoSeq),
+        });
+      } else {
+        fixedTopdata.push({
+          record_no: com.record_no,
+          _bp_lineitems: [],
+        });
+      }
+    });
+
+    const deleteTopFinal = [];
+
+    await originalTopdata.forEach((com) =>
+      fixedTopdata.forEach((com2) => {
+        if (com.record_no === com2.record_no) {
+          deleteTopFinal.push({
+            record_no: com.record_no,
+            _bp_lineitems: com._bp_lineitems.filter(
+              (x) => !com2._bp_lineitems.includes(x)
+            ),
+          });
+        }
+      })
+    );
+
+    //oragle request
+
+    await deleteComFinal.forEach(async (com) => {
+      if (com._bp_lineitems.length > 0) {
+        console.log(com._bp_lineitems.join());
+        fetch(`http://localhost:8000/blockInfo/delete/${params.id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            record_no: com.record_no,
+            _bp_lineitems: com._bp_lineitems.join(),
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success === true) {
+              console.log(data);
+              // setTestCount((prev) => prev++);
+            }
+          });
+      }
+    });
+
+    // await finalComData.forEach(async (com) => {
+    //   fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(com),
+    //   })
+    //     .then((res) => res.json())
+    //     .then((data) => {
+    //       if (data.success === true) {
+    //         console.log(data.success === true);
+    //         setTestCount((prev) => prev++);
+    //       }
+    //     });
+    // });
+
+    fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(finalComData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success === true) {
+          console.log(data.success === true);
+          setTestCount((prev) => prev++);
+        }
+      });
   };
+
+  const [testCount, setTestCount] = useState(0);
 
   const rePositioning = () => {
     const diagram = diagramRef.current?.getDiagram();
@@ -1546,7 +1569,7 @@ const BlockInsert = () => {
           }
         />
         <div className="buttonBox9">
-          <button id="SaveButton" className="saveButton" onClick={save}>
+          {/* <button id="SaveButton" className="saveButton" onClick={save}>
             Save
           </button>
           <button className="loadButton" onClick={load}>
@@ -1563,10 +1586,7 @@ const BlockInsert = () => {
           </button>
           <button id="ResetButton" name="reset" onClick={filtering}>
             Reset
-          </button>
-          <button id="ResetButton" name="reset" onClick={rePositioning}>
-            Re Positioning
-          </button>
+          </button> */}
         </div>
 
         <div className="blockInsertBox">
@@ -1597,9 +1617,12 @@ const BlockInsert = () => {
               diagramRef={diagramRef}
             />
           )}
-
-          <button onClick={InsertBlockData}>Insert</button>
-          <button onClick={finalDataSave}>Save</button>
+          <div className="InsertButtonBox">
+            <button onClick={InsertBlockData}>Insert</button>
+            <button onClick={finalDataSave}>Save</button>
+            <button onClick={rePositioning}>Re Positioning</button>
+            <div>{testCount}</div>
+          </div>
         </div>
       </div>
     </>
@@ -1607,3 +1630,106 @@ const BlockInsert = () => {
 };
 
 export default BlockInsert;
+
+const baseInsertComData = {
+  key: "",
+  category: "Low",
+  uuu_P6ActivityName: "",
+  planDate: "Plan Date",
+  ddd_evm_plan_start: "",
+  ddd_evm_plan_finish: "",
+  uuu_P6PlannedDuration: "",
+  actualDate: "Actual Date",
+  ddd_evm_actual_start: "",
+  ddd_evm_actual_finish: "",
+  uuu_P6ActualDuration: "",
+  record_no: "",
+};
+
+const baseInsertTopData = {
+  key: "",
+  category: "Top",
+  uuu_P6ActivityName: "",
+  planDate: "Plan Date",
+  ddd_evm_plan_start: "",
+  actualDate: "Actual Date",
+  ddd_evm_actual_start: "",
+  record_no: "",
+};
+
+// const [modelData, setModalDate] = useState({
+//   class: "GraphLinksModel",
+//   nodeDataArray: [],
+//   linkDataArray: [],
+// });
+
+// const save = () => {
+//   const diagram = diagramRef.current?.getDiagram();
+
+//   setModalDate({
+//     ...modelData,
+//     nodeDataArray: JSON.parse(diagram.model.toJson()).nodeDataArray,
+//     linkDataArray: JSON.parse(diagram.model.toJson()).linkDataArray,
+//   });
+//   diagram.isModified = false;
+
+//   console.log(JSON.parse(diagram.model.toJson()));
+// };
+
+// const load = () => {
+//   const diagram = diagramRef.current?.getDiagram();
+//   diagram.model = go.Model.fromJson(JSON.stringify(modelData));
+// };
+
+// const filtering = (e) => {
+//   const diagram = diagramRef.current?.getDiagram();
+
+//   if (e.target.name === "reset") {
+//     diagram.model = go.Model.fromJson(JSON.stringify(modelData));
+//   } else {
+//     let filteringModel = { ...modelData };
+//     const filterNodeDataArray = modelData.nodeDataArray.filter((com) => {
+//       return com.category === e.target.name;
+//     });
+
+//     filteringModel.nodeDataArray = filterNodeDataArray;
+
+//     const linkFilterArray = modelData.nodeDataArray.filter((com) => {
+//       return com.category !== e.target.name;
+//     });
+
+//     const test0 = linkFilterArray.map((com) => com.key);
+
+//     const test1 = modelData.linkDataArray.filter((com) => {
+//       return test0.some((com2) => {
+//         return com.to === com2;
+//       });
+//     });
+
+//     const test2 = modelData.linkDataArray.filter((com) => {
+//       return test0.some((com2) => {
+//         return com.from === com2;
+//       });
+//     });
+
+//     const totalTest = [];
+
+//     test1.map((com) => {
+//       return totalTest.push(com);
+//     });
+
+//     test2.map((com) => {
+//       return totalTest.push(com);
+//     });
+
+//     const totalTestResult = [...new Set(totalTest)];
+
+//     const linkDataArrayResult = [...modelData.linkDataArray].filter(
+//       (com) => !totalTestResult.includes(com)
+//     );
+
+//     filteringModel.linkDataArray = linkDataArrayResult;
+
+//     diagram.model = go.Model.fromJson(JSON.stringify(filteringModel));
+//   }
+// };
