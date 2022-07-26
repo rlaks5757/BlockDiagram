@@ -6,7 +6,7 @@ const Router = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<BlockInsert />} />
+        <Route path="/:id" element={<BlockInsert />} />
       </Routes>
     </BrowserRouter>
   );

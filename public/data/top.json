@@ -21,7 +21,8 @@
           "uuu_tab_id": "Relationship",
           "short_desc": "1",
           "li_num": 1,
-          "uuu_P6ActivityName": "Cold Commissioning for Water Injection System"
+          "uuu_P6ActivityName": "Cold Commissioning for Water Injection System",
+          "dtsLineAutoSeq": "0001"
         }
       ],
       "dtsTOPDescription": "Water Injection blah blah reduce NOx emission blah blah",
@@ -54,7 +55,8 @@
           "uuu_tab_id": "Relationship",
           "short_desc": "1",
           "li_num": 1,
-          "uuu_P6ActivityName": "Gas Turbine Cold Commissioning"
+          "uuu_P6ActivityName": "Gas Turbine Cold Commissioning",
+          "dtsLineAutoSeq": "0001"
         },
         {
           "ddd_evm_plan_finish": "08-02-2022 00:00:00",
@@ -66,7 +68,8 @@
           "uuu_tab_id": "Relationship",
           "short_desc": "1",
           "li_num": 1,
-          "uuu_P6ActivityName": "Gas Turbine Cold Commissioning"
+          "uuu_P6ActivityName": "Gas Turbine Cold Commissioning",
+          "dtsLineAutoSeq": "0002"
         }
       ],
       "dtsTOPDescription": "Gas Turbine Main body, IGV, VGV",
