@@ -998,45 +998,74 @@ const BlockInsert = () => {
         );
 
         const comData = await fetchData.data.com;
-        console.log(comData);
-        console.log(baseSet);
 
         await setComOriginalData(comData);
 
-        const topFetchData = await axios.get("/data/top.json");
-        const topData = await topFetchData.data.data;
+        // const topFetchData = await axios.get("/data/top.json");
+        // const topData = await topFetchData.data.data;
+        const topData = await fetchData.data.top;
 
         await setTopOriginalData(topData);
 
         await comData.forEach((com) => {
           if (com.status !== "Deleted") {
-            baseSet.nodeDataArray.push({
-              key: com.uuu_P6ActivityId,
-              category: com.dtsDashBlockCategory,
-              uuu_P6ActivityName: com.uuu_P6ActivityName,
-              planDate: "Plan Date",
-              ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
-                "MM-DD-YYYY"
-              ),
-              ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
-                "MM-DD-YYYY"
-              ),
-              uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
-              actualDate: "Actual Date",
-              ddd_evm_actual_start:
-                moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
-                  : null,
-              ddd_evm_actual_finish:
-                moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
-                  : null,
-              uuu_P6ActualDuration: com.uuu_P6ActualDuration,
-              loc: com.dtsDashCoordinates,
-              record_no: com.record_no,
-            });
+            if (com.dtsDashCoordinates !== null) {
+              baseSet.nodeDataArray.push({
+                key: com.uuu_P6ActivityId,
+                category: com.dtsPrioritySPD,
+                uuu_P6ActivityName: com.uuu_P6ActivityName,
+                planDate: "Plan Date",
+                ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
+                  "MM-DD-YYYY"
+                ),
+                ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
+                  "MM-DD-YYYY"
+                ),
+                uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
+                actualDate: "Actual Date",
+                ddd_evm_actual_start:
+                  moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
+                    : null,
+                ddd_evm_actual_finish:
+                  moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
+                    : null,
+                uuu_P6ActualDuration: com.uuu_P6ActualDuration,
+                loc: com.dtsDashCoordinates,
+                record_no: com.record_no,
+              });
+            } else {
+              baseSet.nodeDataArray.push({
+                key: com.uuu_P6ActivityId,
+                category: com.dtsPrioritySPD,
+                uuu_P6ActivityName: com.uuu_P6ActivityName,
+                planDate: "Plan Date",
+                ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
+                  "MM-DD-YYYY"
+                ),
+                ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
+                  "MM-DD-YYYY"
+                ),
+                uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
+                actualDate: "Actual Date",
+                ddd_evm_actual_start:
+                  moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
+                    : null,
+                ddd_evm_actual_finish:
+                  moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
+                    : null,
+                uuu_P6ActualDuration: com.uuu_P6ActualDuration,
+
+                record_no: com.record_no,
+              });
+            }
           }
         });
 
@@ -1058,28 +1087,48 @@ const BlockInsert = () => {
 
         await topData.forEach((com) => {
           if (com.status !== "Deleted") {
-            baseSet.nodeDataArray.push({
-              key: com.dtsTOPCode,
-              category: "Top",
-              uuu_P6ActivityName: com.dtsTOPTitle,
-              planDate: "Plan Date",
-              ddd_evm_plan_start: moment(com.dtsPlanHODate).format(
-                "MM-DD-YYYY"
-              ),
-              actualDate: "Actual Date",
-              ddd_evm_actual_start:
-                moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
-                  : null,
-              record_no: com.record_no,
-            });
+            if (com.dtsDashCoordinates !== null) {
+              baseSet.nodeDataArray.push({
+                key: com.dtsTOPCode,
+                category: "Top",
+                uuu_P6ActivityName: com.dtsTOPTitle,
+                planDate: "Plan Date",
+                ddd_evm_plan_start: moment(com.dtsPlanHODate).format(
+                  "MM-DD-YYYY"
+                ),
+                actualDate: "Actual Date",
+                ddd_evm_actual_start:
+                  moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
+                    : null,
+                loc: com.dtsDashCoordinates,
+                record_no: com.record_no,
+              });
+            } else {
+              baseSet.nodeDataArray.push({
+                key: com.dtsTOPCode,
+                category: "Top",
+                uuu_P6ActivityName: com.dtsTOPTitle,
+                planDate: "Plan Date",
+                ddd_evm_plan_start: moment(com.dtsPlanHODate).format(
+                  "MM-DD-YYYY"
+                ),
+                actualDate: "Actual Date",
+                ddd_evm_actual_start:
+                  moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
+                    : null,
+                record_no: com.record_no,
+              });
+            }
           }
         });
 
         await topData.forEach((com) => {
           if (com.status !== "Deleted") {
-            if (com._bp_lineitems.length > 0) {
+            if (com._bp_lineitems !== undefined) {
               com._bp_lineitems.forEach((com2) => {
                 baseSet.linkDataArray.push({
                   from: com.dtsTOPCode,
@@ -1273,6 +1322,7 @@ const BlockInsert = () => {
               : com.ddd_evm_actual_start !== null ||
                 (com.ddd_evm_actual_start.length !== 0 && "In_Progress"),
           dtsDashCoordinates: com.loc,
+          dtsPrioritySPD: com.category,
           record_no: com.record_no,
           _bp_lineitems: [],
         });
@@ -1313,29 +1363,21 @@ const BlockInsert = () => {
 
     await topData.forEach((com) => {
       insertNodeData.linkDataArray.forEach((com2) => {
-        if (com.uuu_P6ActivityId === com2.from) {
+        if (com.dtsTOPCode === com2.from) {
           if (com2.dtsLineAutoSeq !== undefined) {
             com._bp_lineitems.push({
               dtsCommActivityBPK: com2.to,
               dtsDashCoordinates: com2.points.join(),
-              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
-                (com3) => {
-                  return com3.key === com2.to;
-                }
-              )[0]["uuu_P6ActivityName"],
               dtsLineAutoSeq: com2.dtsLineAutoSeq,
+              uuu_tab_id: "Relationship",
               short_desc: "1",
             });
           } else {
             com._bp_lineitems.push({
               dtsCommActivityBPK: com2.to,
               dtsDashCoordinates: com2.points.join(),
-              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
-                (com3) => {
-                  return com3.key === com2.to;
-                }
-              )[0]["uuu_P6ActivityName"],
               dtsLineAutoSeq: "99999",
+              uuu_tab_id: "Relationship",
               short_desc: "1",
             });
           }
@@ -1371,10 +1413,11 @@ const BlockInsert = () => {
     );
 
     const lastestComFetchData = await fetchData.data.com;
+    const lastestTopFetchData = await fetchData.data.top;
 
     const originalComdata = [];
 
-    await lastestComFetchData.forEach((com) => {
+    lastestComFetchData.forEach((com) => {
       if (com._bp_lineitems !== undefined) {
         originalComdata.push({
           record_no: com.record_no,
@@ -1390,7 +1433,7 @@ const BlockInsert = () => {
 
     const fixedComdata = [];
 
-    await finalComData.forEach((com) => {
+    lastestTopFetchData.forEach((com) => {
       if (com._bp_lineitems !== undefined) {
         fixedComdata.push({
           record_no: com.record_no,
@@ -1404,24 +1447,9 @@ const BlockInsert = () => {
       }
     });
 
-    const deleteComFinal = [];
-
-    await originalComdata.forEach((com) =>
-      fixedComdata.forEach((com2) => {
-        if (com.record_no === com2.record_no) {
-          deleteComFinal.push({
-            record_no: com.record_no,
-            _bp_lineitems: com._bp_lineitems.filter(
-              (x) => !com2._bp_lineitems.includes(x)
-            ),
-          });
-        }
-      })
-    );
-
     const originalTopdata = [];
 
-    await topOriginalData.forEach((com) => {
+    topOriginalData.forEach((com) => {
       if (com._bp_lineitems !== undefined) {
         originalTopdata.push({
           record_no: com.record_no,
@@ -1437,7 +1465,7 @@ const BlockInsert = () => {
 
     const fixedTopdata = [];
 
-    await finalTopData.forEach((com) => {
+    finalTopData.forEach((com) => {
       if (com._bp_lineitems !== undefined) {
         fixedTopdata.push({
           record_no: com.record_no,
@@ -1451,9 +1479,25 @@ const BlockInsert = () => {
       }
     });
 
+    //Delete Items Start
+    const deleteComFinal = [];
+
+    originalComdata.forEach((com) =>
+      fixedComdata.forEach((com2) => {
+        if (com.record_no === com2.record_no) {
+          deleteComFinal.push({
+            record_no: com.record_no,
+            _bp_lineitems: com._bp_lineitems.filter(
+              (x) => !com2._bp_lineitems.includes(x)
+            ),
+          });
+        }
+      })
+    );
+
     const deleteTopFinal = [];
 
-    await originalTopdata.forEach((com) =>
+    originalTopdata.forEach((com) =>
       fixedTopdata.forEach((com2) => {
         if (com.record_no === com2.record_no) {
           deleteTopFinal.push({
@@ -1465,63 +1509,117 @@ const BlockInsert = () => {
         }
       })
     );
+    //Delete Items Finish
+
+    const originalComdataID = lastestComFetchData.map(
+      (com) => com.uuu_P6ActivityId
+    );
+
+    const originalTopdataID = lastestTopFetchData.map((com) => com.dtsTOPCode);
+
+    //Input Items Start
+
+    const newComItem = finalComData.filter(
+      (x) => !originalComdataID.includes(x.uuu_P6ActivityId)
+    );
+
+    const newTopItem = finalTopData.filter(
+      (x) => !originalTopdataID.includes(x.dtsTOPCode)
+    );
+    //Input Items Finish
+
+    //fixed Items Start
+    const fixedComItem = finalComData.filter((x) =>
+      originalComdataID.includes(x.uuu_P6ActivityId)
+    );
+
+    const fixedTopItem = finalTopData.filter((x) =>
+      originalTopdataID.includes(x.dtsTOPCode)
+    );
 
     //oragle request
-
-    await deleteComFinal.forEach(async (com) => {
-      if (com._bp_lineitems.length > 0) {
-        console.log(com._bp_lineitems.join());
-        fetch(`http://localhost:8000/blockInfo/delete/${params.id}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            record_no: com.record_no,
-            _bp_lineitems: com._bp_lineitems.join(),
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success === true) {
-              console.log(data);
-              // setTestCount((prev) => prev++);
-            }
-          });
-      }
-    });
-
-    // await finalComData.forEach(async (com) => {
-    //   fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
+    //Input
+    // for (const inputItem of newComItem) {
+    //   fetch(`http://localhost:8000/blockInfo/new/${params.id}`, {
     //     method: "POST",
     //     headers: {
     //       "Content-Type": "application/json",
     //     },
-    //     body: JSON.stringify(com),
+    //     body: JSON.stringify({
+    //       bpName: "Commissioning Activities",
+    //       data: inputItem,
+    //     }),
     //   })
     //     .then((res) => res.json())
     //     .then((data) => {
-    //       if (data.success === true) {
-    //         console.log(data.success === true);
-    //         setTestCount((prev) => prev++);
-    //       }
+    //       setTestCount((prev) => prev++);
     //     });
-    // });
+    // }
 
-    fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(finalComData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success === true) {
-          console.log(data.success === true);
-          setTestCount((prev) => prev++);
-        }
-      });
+    // for (const inputItem of newTopItem) {
+    //   fetch(`http://localhost:8000/blockInfo/new/${params.id}`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({ bpName: "Turnover Packages", data: inputItem }),
+    //   })
+    //     .then((res) => res.json())
+    //     .then((data) => {
+    //       setTestCount((prev) => prev++);
+    //     });
+    // }
+
+    // //Delete
+    // for (const deleteItem of deleteComFinal) {
+    //   if (deleteItem._bp_lineitems.length > 0) {
+    //     fetch(`http://localhost:8000/blockInfo/delete/${params.id}`, {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({
+    //         record_no: deleteItem.record_no,
+    //         _bp_lineitems: deleteItem._bp_lineitems.join(),
+    //       }),
+    //     })
+    //       .then((res) => res.json())
+    //       .then((data) => {
+    //         setTestCount((prev) => prev++);
+    //       });
+    //   }
+    // }
+    // //Fixed
+    for (const fixed of fixedComItem) {
+      fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bpName: "Commissioning Activities",
+          data: fixed,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setTestCount((prev) => prev + 1);
+        });
+    }
+
+    for (const fixed of fixedTopItem) {
+      fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ bpName: "Turnover Packages", data: fixed }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setTestCount((prev) => prev + 1);
+        });
+    }
   };
 
   const [testCount, setTestCount] = useState(0);
