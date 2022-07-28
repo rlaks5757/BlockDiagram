@@ -31,7 +31,8 @@ const ComCardInsert = ({
   };
 
   return (
-    <>
+    <div className="blockSampleComModal">
+      <div className="blockSampleModalBackground" />
       <div className="blockSampleCom">
         <div className="blockSampleTitle">{insertData.uuu_P6ActivityName}</div>
         <div className="blockSampleDate">{insertData.planDate}</div>
@@ -200,7 +201,7 @@ const ComCardInsert = ({
           />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

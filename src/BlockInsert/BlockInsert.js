@@ -7,6 +7,8 @@ import "./BlockInsert.scss";
 import ComCardInsert from "./ComCardInsert/ComCardInsert";
 import TopCardInsert from "./ComCardInsert/TopCardInsert";
 import axios from "axios";
+import ComModal from "./ComCardInsert/ComModal";
+import TopModal from "./ComCardInsert/TopModal";
 
 const BlockInsert = () => {
   const params = useParams();
@@ -32,6 +34,73 @@ const BlockInsert = () => {
 
   const diagramRef = useRef();
 
+  const useConfirm = (message = null, onConfirm, onCancel) => {
+    if (!onConfirm || typeof onConfirm !== "function") {
+      return;
+    }
+    if (onCancel && typeof onCancel !== "function") {
+      return;
+    }
+
+    const confirmAction = () => {
+      if (window.confirm(message())) {
+        onConfirm();
+      } else {
+        onCancel();
+      }
+    };
+
+    return confirmAction;
+  };
+
+  const deleteList = () => {
+    const diagram = diagramRef.current.getDiagram();
+
+    const selectNode = [];
+
+    diagram.selection.each((e) => {
+      if (e.data.key !== undefined) {
+        selectNode.push(e.data.uuu_P6ActivityName);
+      }
+    });
+
+    return "삭제 목록: " + selectNode.join();
+  };
+
+  const deleteConfirm = () => {
+    const diagram = diagramRef.current?.getDiagram();
+
+    const selectNode = [];
+
+    diagram.selection.each((e) => {
+      if (e.data.key !== undefined) {
+        selectNode.push(e.data.key);
+      }
+    });
+
+    const insertNodeData = JSON.parse(diagram.model.toJson());
+
+    const nodeDatas = insertNodeData.nodeDataArray.filter(
+      (com) => !selectNode.includes(com.key)
+    );
+
+    const linkDatas = insertNodeData.linkDataArray.filter(
+      (com) => !selectNode.includes(com.to)
+    );
+
+    insertNodeData.nodeDataArray = nodeDatas;
+    insertNodeData.linkDataArray = linkDatas;
+    diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+
+    alert("삭제했습니다.");
+  };
+
+  const cancelConfirm = () => {
+    alert("취소했습니다.");
+  };
+
+  const confirmDelete = useConfirm(deleteList, deleteConfirm, cancelConfirm);
+
   const initDiagram = () => {
     const $ = go.GraphObject.make;
 
@@ -47,6 +116,15 @@ const BlockInsert = () => {
       LinkDrawn: showLinkLabel, // this DiagramEvent listener is defined below
       LinkRelinked: showLinkLabel,
     });
+
+    myDiagram.commandHandler.doKeyDown = function () {
+      var e = myDiagram.lastInput;
+      if (e.key === "Backspace") {
+        confirmDelete();
+        return;
+      } else {
+      }
+    };
 
     myDiagram.addDiagramListener("Modified", (e) => {
       var button = document.getElementById("SaveButton");
@@ -106,9 +184,11 @@ const BlockInsert = () => {
     var steamItemFill = "#B3E5FC";
 
     const clickEvent = function (e, node) {
-      console.log(node);
       // highlight all Links and Nodes coming out of a given Node
+
       var diagram = node.diagram;
+      console.log(node.data);
+
       diagram.startTransaction("highlight");
       // remove any previous highlighting
       diagram.clearHighlighteds();
@@ -127,6 +207,25 @@ const BlockInsert = () => {
         n.isHighlighted = true;
       });
       diagram.commitTransaction("highlight");
+
+      diagram.commandHandler.doKeyDown = function () {
+        var e = myDiagram.lastInput;
+        if (e.key === "Backspace") {
+          confirmDelete();
+          return;
+        } else {
+        }
+      };
+    };
+
+    const linkClickEvent = (e, node) => {
+      myDiagram.commandHandler.doKeyDown = function () {
+        var ekey = myDiagram.lastInput;
+
+        if (ekey.key === "Backspace") {
+          e.diagram.commandHandler.deleteSelection();
+        }
+      };
     };
 
     var defaultAdornment = $(
@@ -153,6 +252,7 @@ const BlockInsert = () => {
       "High", // the default category
       $(
         go.Node,
+        "Vertical",
         { selectionAdornmentTemplate: defaultAdornment },
         go.Panel.Auto,
         nodeStyle(),
@@ -233,7 +333,6 @@ const BlockInsert = () => {
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
               editable: true,
-
               row: 0,
               column: 0,
               columnSpan: 3,
@@ -260,7 +359,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
               editable: true,
-
+              textEditor: window.TextEditor,
               row: 2,
               column: 0,
               columnSpan: 1,
@@ -274,7 +373,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
               editable: true,
-
+              textEditor: window.TextEditor,
               row: 3,
               column: 0,
               columnSpan: 1,
@@ -305,20 +404,26 @@ const BlockInsert = () => {
             textAlign: "center",
             font: "bold 13px sans-serif",
           }),
-          $(go.TextBlock, new go.Binding("text", "actualDateS").makeTwoWay(), {
-            editable: true,
-            row: 5,
-            column: 0,
-            columnSpan: 1,
-            width: 100,
-            margin: 5,
-            textAlign: "center",
-          }),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 5,
+              column: 0,
+              columnSpan: 1,
+              width: 100,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
           $(
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 6,
               column: 0,
               columnSpan: 1,
@@ -462,7 +567,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
               editable: true,
-
+              textEditor: window.TextEditor,
               row: 2,
               column: 0,
               columnSpan: 1,
@@ -476,6 +581,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 3,
               column: 0,
               columnSpan: 1,
@@ -511,6 +617,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 5,
               column: 0,
               columnSpan: 1,
@@ -524,6 +631,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 6,
               column: 0,
               columnSpan: 1,
@@ -647,6 +755,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 2,
               column: 0,
               columnSpan: 1,
@@ -660,6 +769,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 3,
               column: 0,
               columnSpan: 1,
@@ -695,6 +805,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 5,
               column: 0,
               columnSpan: 1,
@@ -708,6 +819,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 6,
               column: 0,
               columnSpan: 1,
@@ -796,7 +908,6 @@ const BlockInsert = () => {
           }),
           $(go.RowColumnDefinition, { row: 6, separatorStroke: "black" }),
           $(go.TextBlock, new go.Binding("text", "key").makeTwoWay(), {
-            editable: true,
             row: 0,
             column: 0,
             columnSpan: 3,
@@ -837,6 +948,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 3,
               column: 0,
               columnSpan: 3,
@@ -859,6 +971,7 @@ const BlockInsert = () => {
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
               editable: true,
+              textEditor: window.TextEditor,
               row: 6,
               column: 0,
               columnSpan: 3,
@@ -896,6 +1009,7 @@ const BlockInsert = () => {
 
     myDiagram.linkTemplate = $(
       go.Link, // the whole link panel
+      { click: linkClickEvent },
       {
         routing: go.Link.AvoidsNodes,
         curve: go.Link.JumpOver,
@@ -1578,9 +1692,7 @@ const BlockInsert = () => {
         }),
       })
         .then((res) => res.json())
-        .then((data) => {
-          setTestCount((prev) => prev++);
-        });
+        .then((data) => {});
     }
 
     for (const inputItem of newTopItem) {
@@ -1592,9 +1704,7 @@ const BlockInsert = () => {
         body: JSON.stringify({ bpName: "Turnover Packages", data: inputItem }),
       })
         .then((res) => res.json())
-        .then((data) => {
-          setTestCount((prev) => prev++);
-        });
+        .then((data) => {});
     }
 
     //Delete
@@ -1612,9 +1722,7 @@ const BlockInsert = () => {
           }),
         })
           .then((res) => res.json())
-          .then((data) => {
-            setTestCount((prev) => prev++);
-          });
+          .then((data) => {});
       }
     }
 
@@ -1632,9 +1740,7 @@ const BlockInsert = () => {
           }),
         })
           .then((res) => res.json())
-          .then((data) => {
-            setTestCount((prev) => prev++);
-          });
+          .then((data) => {});
       }
     }
     //Fixed
@@ -1650,9 +1756,7 @@ const BlockInsert = () => {
         }),
       })
         .then((res) => res.json())
-        .then((data) => {
-          setTestCount((prev) => prev + 1);
-        });
+        .then((data) => {});
     }
 
     for (const fixed of fixedTopItem) {
@@ -1664,13 +1768,9 @@ const BlockInsert = () => {
         body: JSON.stringify({ bpName: "Turnover Packages", data: fixed }),
       })
         .then((res) => res.json())
-        .then((data) => {
-          setTestCount((prev) => prev + 1);
-        });
+        .then((data) => {});
     }
   };
-
-  const [testCount, setTestCount] = useState(0);
 
   const rePositioning = () => {
     const diagram = diagramRef.current?.getDiagram();
@@ -1800,7 +1900,7 @@ const BlockInsert = () => {
         record_no: cardInfo.record_no,
       };
 
-      if (cardInfo._bp_lineitems !== null) {
+      if (cardInfo._bp_lineitems !== undefined) {
         cardInfo._bp_lineitems.forEach((com) => {
           insertNodeData.linkDataArray.push({
             from: cardInfo.uuu_P6ActivityId,
@@ -1830,7 +1930,8 @@ const BlockInsert = () => {
         record_no: cardInfo.record_no,
       };
 
-      if (cardInfo._bp_lineitems !== null) {
+      if (cardInfo._bp_lineitems !== undefined) {
+        console.log(cardInfo._bp_lineitems);
         cardInfo._bp_lineitems.forEach((com) => {
           insertNodeData.linkDataArray.push({
             from: cardInfo.dtsTOPCode,
@@ -1899,153 +2000,31 @@ const BlockInsert = () => {
               diagramRef={diagramRef}
             />
           )}
+          <div className="controlButtonBox">
+            <button>추가하기</button>
+            <button>저장하기</button>
+          </div>
+
           <div className="InsertButtonBox">
             <button onClick={InsertBlockData}>Insert</button>
             <button onClick={finalDataSave}>Save</button>
             <button onClick={rePositioning}>Re Positioning</button>
           </div>
           {modalComToggle && (
-            <div className="blockInsertModal">
-              <div
-                className="blockInsertModalBackground"
-                onClick={closedModal}
-              />
-              <div className="blockInsertModalContents">
-                <div className="blockInsertModalContentsBox">
-                  <div className="blockInsertModalContentsTitle">
-                    비활성화된 Card 정보 입니다.
-                  </div>
-                  <div className="blockInsertModalBox">
-                    <div className="blockInsertModalTitle">
-                      {modalComInfo.uuu_P6ActivityName}
-                    </div>
-                    <div className="blockInsertModalDate">Plan Date</div>
-                    <div className="blockInsertModalDateBox">
-                      <div
-                        className="blockInsertModalDateBoxDate"
-                        style={{
-                          backgroundColor:
-                            modalComInfo.dtsDashBlockCategory === "High"
-                              ? "#F8BBD0"
-                              : modalComInfo.dtsDashBlockCategory === "Medium"
-                              ? "#B3E5FC"
-                              : "white",
-                        }}
-                      >
-                        <div>
-                          {modalComInfo.ddd_evm_plan_start !== null
-                            ? moment(modalComInfo.ddd_evm_plan_start).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                        <div>
-                          {modalComInfo.ddd_evm_plan_finish !== null
-                            ? moment(modalComInfo.ddd_evm_plan_finish).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                      </div>
-                      <div className="blockInsertModalDateBoxDuration">
-                        {modalComInfo.uuu_P6PlannedDuration}
-                      </div>
-                    </div>
-                    <div className="blockInsertModalDate">Actual Date</div>
-                    <div className="blockInsertModalDateBox">
-                      <div
-                        className="blockInsertModalDateBoxDate actual"
-                        style={{
-                          backgroundColor:
-                            modalComInfo.dtsDashBlockCategory === "High"
-                              ? "#F8BBD0"
-                              : modalComInfo.dtsDashBlockCategory === "Medium"
-                              ? "#B3E5FC"
-                              : "white",
-                        }}
-                      >
-                        <div>
-                          {modalComInfo.ddd_evm_actual_start !== null
-                            ? moment(modalComInfo.ddd_evm_actual_start).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                        <div>
-                          {modalComInfo.ddd_evm_actual_finish !== null
-                            ? moment(modalComInfo.ddd_evm_actual_finish).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                      </div>
-                      <div className="blockInsertModalDateBoxDuration">
-                        {modalComInfo.uuu_P6ActualDuration}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="blockInsertModalContentsButtonBox">
-                    <button onClick={closedModal}>취소</button>
-                    <button onClick={() => changeCardStatus(modalComInfo)}>
-                      사용
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ComModal
+              modalComInfo={modalComInfo}
+              modalToggleCN={modalToggleCN}
+              closedModal={closedModal}
+              changeCardStatus={changeCardStatus}
+            />
           )}
           {modalTopToggle && (
-            <div className="blockInsertModal">
-              <div
-                className="blockInsertModalBackground"
-                onClick={closedModal}
-              />
-              <div className="blockInsertModalContents">
-                <div className="blockInsertModalContentsBox">
-                  <div className="blockInsertModalContentsTitle">
-                    비활성화된 Card 정보 입니다.
-                  </div>
-                  <div className="blockInsertModalBox">
-                    <div className="blockSampleKey">
-                      {modalTopInfo.dtsTOPCode}
-                    </div>
-                    <div className="blockInsertModalTitle">
-                      {modalTopInfo.dtsTOPTitle}
-                    </div>
-                    <div className="blockInsertModalDate">Plan Date</div>
-                    <div className="blockInsertModalDateBox">
-                      <div className="blockInsertModalDateBoxDateTop">
-                        <div>
-                          {modalTopInfo.dtsPlanHODate !== null
-                            ? moment(modalTopInfo.dtsPlanHODate).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="blockInsertModalDate">Actual Date</div>
-                    <div className="blockInsertModalDateBox">
-                      <div className="blockInsertModalDateBoxDateTop">
-                        <div>
-                          {modalTopInfo.dtsActualHODate !== null
-                            ? moment(modalTopInfo.dtsActualHODate).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="blockInsertModalContentsButtonBox">
-                    <button onClick={closedModal}>취소</button>
-                    <button onClick={() => changeCardStatus(modalTopInfo)}>
-                      사용
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TopModal
+              modalTopInfo={modalTopInfo}
+              modalToggleCN={modalToggleCN}
+              closedModal={closedModal}
+              changeCardStatus={changeCardStatus}
+            />
           )}
         </div>
       </div>
@@ -2080,3 +2059,189 @@ const baseInsertTopData = {
   ddd_evm_actual_start: "",
   record_no: "",
 };
+
+//TextEditor
+(function (window) {
+  var textarea = document.createElement("input");
+  textarea.type = "date";
+  textarea.id = "myTextArea";
+
+  textarea.addEventListener(
+    "input",
+    function (e) {
+      var tool = TextEditor.tool;
+      if (tool.textBlock === null) return;
+
+      var tempText = tool.measureTemporaryTextBlock(
+        moment(this.value).format("YYYY-MM-DD")
+      );
+      var scale = this.textScale;
+      this.style.width = 20 + tempText.measuredBounds.width * scale + "px";
+      this.rows = tempText.lineCount;
+    },
+    false
+  );
+
+  textarea.addEventListener(
+    "keydown",
+    function (e) {
+      var tool = TextEditor.tool;
+      if (tool.textBlock === null) return;
+      var key = e.key;
+      if (key === "Enter") {
+        if (tool.textBlock.isMultiline === false) e.preventDefault();
+        tool.acceptText(go.TextEditingTool.Enter);
+        return;
+      } else if (key === "Tab") {
+        tool.acceptText(go.TextEditingTool.Tab);
+        e.preventDefault();
+        return;
+      } else if (key === "Escape") {
+        tool.doCancel();
+        if (tool.diagram !== null) tool.diagram.doFocus();
+      }
+    },
+    false
+  );
+
+  // handle focus:
+  textarea.addEventListener(
+    "focus",
+    function (e) {
+      var tool = TextEditor.tool;
+      if (!tool || tool.currentTextEditor === null) return;
+
+      if (tool.state === go.TextEditingTool.StateActive) {
+        tool.state = go.TextEditingTool.StateEditing;
+      }
+
+      if (tool.selectsTextOnActivate) {
+        textarea.select();
+        // textarea.setSelectionRange(0, 9999);
+      }
+    },
+    false
+  );
+
+  // Disallow blur.
+  // If the textEditingTool blurs and the text is not valid,
+  // we do not want focus taken off the element just because a user clicked elsewhere.
+  textarea.addEventListener(
+    "blur",
+    function (e) {
+      var tool = TextEditor.tool;
+      if (
+        !tool ||
+        tool.currentTextEditor === null ||
+        tool.state === go.TextEditingTool.StateNone
+      )
+        return;
+
+      textarea.focus();
+
+      if (tool.selectsTextOnActivate) {
+        textarea.select();
+        // textarea.setSelectionRange(0, 9999);
+      }
+    },
+    false
+  );
+
+  var TextEditor = new go.HTMLInfo();
+
+  TextEditor.valueFunction = function () {
+    if (textarea.value.length > 0) {
+      return moment(new Date(textarea.value)).format("MM-DD-YYYY");
+    } else {
+      return textarea.value;
+    }
+  };
+
+  TextEditor.mainElement = textarea; // to reference it more easily
+
+  TextEditor.tool = null; // Initialize
+
+  // used to be in doActivate
+  TextEditor.show = function (textBlock, diagram, tool) {
+    if (!(textBlock instanceof go.TextBlock)) return;
+    if (TextEditor.tool !== null) return; // Only one at a time.
+
+    TextEditor.tool = tool; // remember the TextEditingTool for use by listeners
+
+    // This is called during validation, if validation failed:
+    if (tool.state === go.TextEditingTool.StateInvalid) {
+      textarea.style.border = "3px solid red";
+      textarea.focus();
+      return;
+    }
+
+    // This part is called during initalization:
+
+    var loc = textBlock.getDocumentPoint(go.Spot.Center);
+    var pos = diagram.position;
+    var sc = diagram.scale;
+    var textscale = textBlock.getDocumentScale() * sc;
+    if (textscale < tool.minimumEditorScale)
+      textscale = tool.minimumEditorScale;
+    // Add slightly more width/height to stop scrollbars and line wrapping on some browsers
+    // +6 is firefox minimum, otherwise lines will be wrapped improperly
+    var textwidth = textBlock.naturalBounds.width * textscale + 6;
+    var textheight = textBlock.naturalBounds.height * textscale + 2;
+    var left = (loc.x - pos.x) * sc;
+    var yCenter = (loc.y - pos.y) * sc; // this is actually the center, used to set style.top
+    var valign = textBlock.verticalAlignment;
+    var oneLineHeight =
+      textBlock.lineHeight + textBlock.spacingAbove + textBlock.spacingBelow;
+    var allLinesHeight = oneLineHeight * textBlock.lineCount * textscale;
+    var center = 0.5 * textheight - 0.5 * allLinesHeight;
+    // add offset to yCenter to get the appropriate position:
+    var yOffset =
+      valign.y * textheight -
+      valign.y * allLinesHeight +
+      valign.offsetY -
+      center -
+      allLinesHeight / 2;
+
+    textarea.value = moment(new Date(textBlock.text)).format("YYYY-MM-DD");
+    // the only way you can mix font and fontSize is if the font inherits and the fontSize overrides
+    // in the future maybe have textarea contained in its own div
+    diagram.div.style["font"] = textBlock.font;
+
+    var paddingsize = 1;
+    textarea.style["position"] = "absolute";
+    textarea.style["zIndex"] = "100";
+    textarea.style["font"] = "inherit";
+    textarea.style["fontSize"] = textscale * 100 + "%";
+    textarea.style["lineHeight"] = "normal";
+    textarea.style["width"] = textwidth + "px";
+    textarea.style["left"] = ((left - textwidth / 2) | 0) - paddingsize + "px";
+    textarea.style["top"] = ((yCenter + yOffset) | 0) - paddingsize + "px";
+    textarea.style["textAlign"] = textBlock.textAlign;
+    textarea.style["margin"] = "0";
+    textarea.style["padding"] = paddingsize + "px";
+    textarea.style["border"] = "0";
+    textarea.style["outline"] = "none";
+    textarea.style["whiteSpace"] = "pre-wrap";
+    textarea.style["overflow"] = "hidden"; // for proper IE wrap
+    textarea.rows = textBlock.lineCount;
+    textarea.textScale = textscale; // attach a value to the textarea, for convenience
+    textarea.className = "goTXarea";
+
+    // Show:
+    diagram.div.appendChild(textarea);
+
+    // After adding, focus:
+    textarea.focus();
+    if (tool.selectsTextOnActivate) {
+      textarea.select();
+      // textarea.setSelectionRange(0, 9999);
+    }
+  };
+
+  TextEditor.hide = function (diagram, tool) {
+    diagram.div.removeChild(textarea);
+    TextEditor.tool = null; // forget reference to TextEditingTool
+  };
+
+  window.TextEditor = TextEditor;
+})(window);

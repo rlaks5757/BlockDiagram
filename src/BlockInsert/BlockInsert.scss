@@ -23,6 +23,18 @@
     border: 1px solid black;
   }
 
+  .controlButtonBox {
+    position: absolute;
+    right: 300px;
+    bottom: 0;
+    padding: 10px 5px;
+    z-index: 100;
+
+    button {
+      padding: 5px 10px;
+    }
+  }
+
   .blockInsertBox {
     width: 300px;
     display: flex;
@@ -153,6 +165,8 @@
       left: 0;
       z-index: 100;
 
+      animation: fadein 0.5s ease-in;
+
       .blockInsertModalBackground {
         position: fixed;
         top: 0;
@@ -268,6 +282,10 @@
         background-color: rgba($color: #fff, $alpha: 1);
       }
     }
+
+    .blockInsertModal.close {
+      animation: fadeout 0.5s ease-in-out;
+    }
   }
 }
 
@@ -280,4 +298,22 @@
 
 button {
   margin-right: 10px;
+}
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
