@@ -107,3 +107,41 @@ const TopCardInsert = ({ insertTopData, handleInsertTopData, diagramRef }) => {
 };
 
 export default TopCardInsert;
+
+// message: [
+//   {
+//     ddd_evm_plan_start: '02-02-2022 00:00:00',
+//     uuu_P6ActivityId: 'KIMAN005',
+//     uuu_P6ActualDuration: 0,
+//     ddd_evm_plan_finish: '03-24-2022 00:00:00',
+//     ddd_evm_actual_finish: ' ',
+//     _record_status: 'This record is in Terminal status and can not be edited. ',
+//     _bp_lineitems: [Array],
+//     dtsDashCoordinates: '-400 100',
+//     record_no: 'CMA-0005',
+//     uuu_P6PlannedDuration: 51,
+//     uuu_P6ActivityName: 'Water Treatment System Commissioning',
+//     ddd_evm_actual_start: ' ',
+//     dtsPrioritySPD: 'Low',
+//     status: 'Not_Started'
+//   }
+// ],
+
+// message: [
+//   {
+//     ddd_evm_plan_start: '07-01-2022 00:00:00',
+//     uuu_P6ActivityId: 'KIMAN021',
+//     uuu_P6ActualDuration: 0,
+//     ddd_evm_plan_finish: '07-02-2022 00:00:00',
+//     ddd_evm_actual_finish: ' ',
+//     _record_status: 'success',
+//     _bp_lineitems: [],
+//     dtsDashCoordinates: '400 -200',
+//     record_no: 'CMA-0016',
+//     uuu_P6PlannedDuration: 2,
+//     uuu_P6ActivityName: 'TEST CARD',
+//     ddd_evm_actual_start: ' ',
+//     dtsPrioritySPD: 'Low',
+//     status: 'Not_Started'
+//   }
+// ],

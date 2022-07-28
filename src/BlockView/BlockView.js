@@ -3,12 +3,11 @@ import { useParams } from "react-router-dom";
 import * as go from "gojs";
 import { ReactDiagram, ReactOverview } from "gojs-react";
 import moment from "moment";
-import "./BlockInsert.scss";
-import ComCardInsert from "./ComCardInsert/ComCardInsert";
-import TopCardInsert from "./ComCardInsert/TopCardInsert";
+import "./BlockView.scss";
+
 import axios from "axios";
 
-const BlockInsert = () => {
+const BlockView = () => {
   const params = useParams();
   const [originalComBaseSet, setOriginalComBaseSet] = useState({});
   const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
@@ -16,21 +15,14 @@ const BlockInsert = () => {
   const [comOriginalData, setComOriginalData] = useState([]);
   const [topOriginalData, setTopOriginalData] = useState([]);
 
-  const [insertDataToggle, setInsertDataToogle] = useState(true);
-
-  const [insertData, setInsertData] = useState(baseInsertComData);
-
-  const [insertTopData, setInsertTopData] = useState(baseInsertTopData);
-
   const [loadModelData, setLoadModelData] = useState(false);
 
-  const [modalComToggle, setModalComToggle] = useState(false);
-  const [modalTopToggle, setModalTopToggle] = useState(false);
-  const [modalToggleCN, setModalToggleCN] = useState(false);
-  const [modalComInfo, setModalComInfo] = useState({});
-  const [modalTopInfo, setModalTopInfo] = useState({});
-
   const diagramRef = useRef();
+
+  const handleNodeClick = (e, node) => {
+    console.log(e);
+    console.log(node.diagram);
+  };
 
   const initDiagram = () => {
     const $ = go.GraphObject.make;
@@ -106,7 +98,6 @@ const BlockInsert = () => {
     var steamItemFill = "#B3E5FC";
 
     const clickEvent = function (e, node) {
-      console.log(node);
       // highlight all Links and Nodes coming out of a given Node
       var diagram = node.diagram;
       diagram.startTransaction("highlight");
@@ -156,7 +147,7 @@ const BlockInsert = () => {
         { selectionAdornmentTemplate: defaultAdornment },
         go.Panel.Auto,
         nodeStyle(),
-        { click: clickEvent },
+        { click: handleNodeClick },
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
 
         $(
@@ -1145,22 +1136,14 @@ const BlockInsert = () => {
       const comBaseSet = comData.filter((com) => com.status !== "Deleted");
       const topBaseSet = topData.filter((com) => com.status !== "Deleted");
 
-      const comID = comData.map((com) => {
-        return {
-          ...com,
-          uuu_P6ActivityId: com.uuu_P6ActivityId,
-          status: com.status,
-        };
-      });
-      const topID = topData.map((com) => {
-        return { ...com, uuu_P6ActivityId: com.dtsTOPCode, status: com.status };
-      });
-
-      setOriginalComBaseSet(comBaseSet);
-      setOriginalTopBaseSet(topBaseSet);
+      const comID = comData.map((com) => com.uuu_P6ActivityId);
+      const topID = topData.map((com) => com.dtsTOPCode);
 
       setComOriginalData(comID);
       setTopOriginalData(topID);
+
+      setOriginalComBaseSet(comBaseSet);
+      setOriginalTopBaseSet(topBaseSet);
       diagram.model = go.Model.fromJson(JSON.stringify(baseSet));
     } catch (err) {
       console.log(err);
@@ -1175,908 +1158,118 @@ const BlockInsert = () => {
     commissionFetch();
   }, [params]);
 
-  const handleInsertData = (e) => {
-    const { value, name } = e.target;
-
-    if (name === "uuu_P6ActivityName") {
-      setInsertData((prev) => {
-        return {
-          ...prev,
-          [name]: value,
-        };
-      });
-    } else if (name === "key") {
-      setInsertData((prev) => {
-        return {
-          ...prev,
-          key: value.toUpperCase(),
-        };
-      });
-    } else if (name === "category") {
-      if (value === "Turn-Over Package") {
-        setInsertDataToogle(false);
-        setInsertTopData((prev) => {
-          return {
-            ...prev,
-            [name]: "Top",
-          };
-        });
-      } else {
-        setInsertDataToogle(true);
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            [name]: value.split(" ")[1],
-          };
-        });
-      }
-    } else {
-      setInsertData((prev) => {
-        return {
-          ...prev,
-          [name]: moment(new Date(value)).format("MM-DD-YYYY"),
-        };
-      });
-    }
-  };
-
-  //여기에 넣을꺼임
-
-  const handleInsertTopData = (e) => {
-    const { value, name } = e.target;
-
-    if (name === "uuu_P6ActivityName") {
-      setInsertTopData((prev) => {
-        return {
-          ...prev,
-          [name]: value,
-        };
-      });
-    } else if (name === "key") {
-      setInsertTopData((prev) => {
-        return {
-          ...prev,
-          key: value.toUpperCase(),
-        };
-      });
-    } else {
-      setInsertTopData((prev) => {
-        return {
-          ...prev,
-          [name]: moment(new Date(value)).format("MM-DD-YYYY"),
-        };
-      });
-    }
-  };
-
-  const InsertBlockData = () => {
-    console.log(insertData);
-
-    const diagram = diagramRef.current?.getDiagram();
-
-    const insertNodeData = JSON.parse(diagram.model.toJson());
-
-    if (insertDataToggle) {
-      insertNodeData.nodeDataArray.push(insertData);
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
-    } else {
-      insertNodeData.nodeDataArray.push(insertTopData);
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
-    }
-
-    setInsertData(baseInsertComData);
-    setInsertTopData(baseInsertTopData);
-  };
-
-  const finalDataSave = async () => {
-    const diagram = await diagramRef.current?.getDiagram();
-
-    const insertNodeData = await JSON.parse(diagram.model.toJson());
-
-    let comData = [];
-    let topData = [];
-
-    await insertNodeData.nodeDataArray.forEach((com) => {
-      if (com.category === "Top") {
-        topData.push({
-          dtsTOPCode: com.key,
-          dtsTOPTitle: com.uuu_P6ActivityName,
-          dtsPlanHODate:
-            com.ddd_evm_plan_start === null ||
-            com.ddd_evm_plan_start.length === 0
-              ? " "
-              : moment(new Date(com.ddd_evm_plan_start)).format(
-                  "MM-DD-YYYY 00:00:00"
-                ),
-          dtsActualHODate:
-            com.ddd_evm_actual_start === null ||
-            com.ddd_evm_actual_start.length === 0
-              ? " "
-              : moment(new Date(com.ddd_evm_actual_start)).format(
-                  "MM-DD-YYYY 00:00:00"
-                ),
-          status:
-            com.ddd_evm_actual_start === null ||
-            com.ddd_evm_actual_start.length === 0
-              ? "Not_Issued"
-              : "Issued",
-          dtsDashCoordinates: com.loc,
-          record_no: com.record_no,
-          _bp_lineitems: [],
-        });
-      } else {
-        comData.push({
-          uuu_P6ActivityId: com.key,
-          uuu_P6ActivityName: com.uuu_P6ActivityName,
-          ddd_evm_plan_start:
-            com.ddd_evm_plan_start === null ||
-            com.ddd_evm_plan_start.length === 0
-              ? " "
-              : moment(new Date(com.ddd_evm_plan_start)).format(
-                  "MM-DD-YYYY 00:00:00"
-                ),
-          ddd_evm_plan_finish:
-            com.ddd_evm_plan_finish === null ||
-            com.ddd_evm_plan_finish.length === 0
-              ? " "
-              : moment(new Date(com.ddd_evm_plan_finish)).format(
-                  "MM-DD-YYYY 00:00:00"
-                ),
-          uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
-          ddd_evm_actual_start:
-            com.ddd_evm_actual_start === null ||
-            com.ddd_evm_actual_start.length === 0
-              ? " "
-              : moment(new Date(com.ddd_evm_actual_start)).format(
-                  "MM-DD-YYYY 00:00:00"
-                ),
-          ddd_evm_actual_finish:
-            com.ddd_evm_actual_finish === null ||
-            com.ddd_evm_actual_finish.length === 0
-              ? " "
-              : moment(new Date(com.ddd_evm_actual_finish)).format(
-                  "MM-DD-YYYY 00:00:00"
-                ),
-          uuu_P6ActualDuration: com.uuu_P6ActualDuration,
-          status:
-            com.ddd_evm_actual_finish === null &&
-            com.ddd_evm_actual_start === null
-              ? "Not_Started"
-              : com.ddd_evm_actual_finish !== null &&
-                com.ddd_evm_actual_start !== null
-              ? "Completed"
-              : com.ddd_evm_actual_start !== null && "In_Progress",
-          dtsDashCoordinates: com.loc,
-          dtsPrioritySPD: com.category,
-          record_no: com.record_no,
-          _bp_lineitems: [],
-        });
-      }
-    });
-
-    await comData.forEach((com) => {
-      insertNodeData.linkDataArray.forEach((com2) => {
-        if (com.uuu_P6ActivityId === com2.from) {
-          if (com2.dtsLineAutoSeq !== undefined) {
-            com._bp_lineitems.push({
-              dtsCommActivityBPK: com2.to,
-              dtsDashCoordinates: com2.points.join(),
-              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
-                (com3) => {
-                  return com3.key === com2.to;
-                }
-              )[0]["uuu_P6ActivityName"],
-              dtsLineAutoSeq: com2.dtsLineAutoSeq,
-              short_desc: "1",
-            });
-          } else {
-            com._bp_lineitems.push({
-              dtsCommActivityBPK: com2.to,
-              dtsDashCoordinates: com2.points.join(),
-              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
-                (com3) => {
-                  return com3.key === com2.to;
-                }
-              )[0]["uuu_P6ActivityName"],
-              dtsLineAutoSeq: "99999",
-              short_desc: "1",
-            });
-          }
-        }
-      });
-    });
-
-    await topData.forEach((com) => {
-      insertNodeData.linkDataArray.forEach((com2) => {
-        if (com.dtsTOPCode === com2.from) {
-          if (com2.dtsLineAutoSeq !== undefined) {
-            com._bp_lineitems.push({
-              dtsCommActivityBPK: com2.to,
-              dtsDashCoordinates: com2.points.join(),
-              dtsLineAutoSeq: com2.dtsLineAutoSeq,
-              uuu_tab_id: "Relationship",
-              short_desc: "1",
-            });
-          } else {
-            com._bp_lineitems.push({
-              dtsCommActivityBPK: com2.to,
-              dtsDashCoordinates: com2.points.join(),
-              dtsLineAutoSeq: "99999",
-              uuu_tab_id: "Relationship",
-              short_desc: "1",
-            });
-          }
-        }
-      });
-    });
-
-    const noneDeleteItem = await insertNodeData.nodeDataArray.map((com) => {
-      return com.key;
-    });
-
-    const comDifference = await originalComBaseSet.filter(
-      (x) => !noneDeleteItem.includes(x.uuu_P6ActivityId)
-    );
-
-    const comDeleteitemChange = await comDifference.map((com) => {
-      return { ...com, status: "Deleted" };
-    });
-
-    const topDifference = await originalTopBaseSet.filter(
-      (x) => !noneDeleteItem.includes(x.dtsTOPCode)
-    );
-
-    const topDeleteitemChange = await topDifference.map((com) => {
-      return { ...com, status: "Deleted" };
-    });
-
-    const finalComData = await comData.concat(comDeleteitemChange);
-    const finalTopData = await topData.concat(topDeleteitemChange);
-
-    const fetchData = await axios.get(
-      `http://localhost:8000/blockInfo/${params.id}`
-    );
-
-    const lastestComFetchData = await fetchData.data.com;
-    const lastestTopFetchData = await fetchData.data.top;
-
-    //com
-    const originalComdata = [];
-
-    lastestComFetchData.forEach((com) => {
-      if (com._bp_lineitems !== undefined) {
-        originalComdata.push({
-          record_no: com.record_no,
-          _bp_lineitems: com._bp_lineitems.map((com2) => com2.dtsLineAutoSeq),
-        });
-      } else {
-        originalComdata.push({
-          record_no: com.record_no,
-          _bp_lineitems: [],
-        });
-      }
-    });
-
-    const fixedComdata = [];
-
-    finalComData.forEach((com) => {
-      if (com._bp_lineitems !== undefined) {
-        fixedComdata.push({
-          record_no: com.record_no,
-          _bp_lineitems: com._bp_lineitems.map((com2) => com2.dtsLineAutoSeq),
-        });
-      } else {
-        fixedComdata.push({
-          record_no: com.record_no,
-          _bp_lineitems: [],
-        });
-      }
-    });
-
-    //Top
-    const originalTopdata = [];
-
-    lastestTopFetchData.forEach((com) => {
-      if (com._bp_lineitems !== undefined) {
-        originalTopdata.push({
-          record_no: com.record_no,
-          _bp_lineitems: com._bp_lineitems.map((com2) => com2.dtsLineAutoSeq),
-        });
-      } else {
-        originalTopdata.push({
-          record_no: com.record_no,
-          _bp_lineitems: [],
-        });
-      }
-    });
-
-    const fixedTopdata = [];
-
-    finalTopData.forEach((com) => {
-      if (com._bp_lineitems !== undefined) {
-        fixedTopdata.push({
-          record_no: com.record_no,
-          _bp_lineitems: com._bp_lineitems.map((com2) => com2.dtsLineAutoSeq),
-        });
-      } else {
-        fixedTopdata.push({
-          record_no: com.record_no,
-          _bp_lineitems: [],
-        });
-      }
-    });
-
-    //Delete Items Start
-    const deleteComFinal = [];
-
-    originalComdata.forEach((com) =>
-      fixedComdata.forEach((com2) => {
-        if (com.record_no === com2.record_no) {
-          deleteComFinal.push({
-            record_no: com.record_no,
-            _bp_lineitems: com._bp_lineitems.filter(
-              (x) => !com2._bp_lineitems.includes(x)
-            ),
-          });
-        }
-      })
-    );
-
-    const deleteTopFinal = [];
-
-    originalTopdata.forEach((com) =>
-      fixedTopdata.forEach((com2) => {
-        if (com.record_no === com2.record_no) {
-          deleteTopFinal.push({
-            record_no: com.record_no,
-            _bp_lineitems: com._bp_lineitems.filter(
-              (x) => !com2._bp_lineitems.includes(x)
-            ),
-          });
-        }
-      })
-    );
-    //Delete Items Finish
-
-    const originalComdataID = lastestComFetchData.map(
-      (com) => com.uuu_P6ActivityId
-    );
-
-    const originalTopdataID = lastestTopFetchData.map((com) => com.dtsTOPCode);
-
-    //Input Items Start
-
-    const newComItem = finalComData.filter(
-      (x) => !originalComdataID.includes(x.uuu_P6ActivityId)
-    );
-
-    const newTopItem = finalTopData.filter(
-      (x) => !originalTopdataID.includes(x.dtsTOPCode)
-    );
-    //Input Items Finish
-
-    //fixed Items Start
-    const fixedComItem = finalComData.filter((x) =>
-      originalComdataID.includes(x.uuu_P6ActivityId)
-    );
-
-    const fixedTopItem = finalTopData.filter((x) =>
-      originalTopdataID.includes(x.dtsTOPCode)
-    );
-
-    //oracle request
-    //Input
-    for (const inputItem of newComItem) {
-      fetch(`http://localhost:8000/blockInfo/new/${params.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bpName: "Commissioning Activities",
-          data: inputItem,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setTestCount((prev) => prev++);
-        });
-    }
-
-    for (const inputItem of newTopItem) {
-      fetch(`http://localhost:8000/blockInfo/new/${params.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ bpName: "Turnover Packages", data: inputItem }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setTestCount((prev) => prev++);
-        });
-    }
-
-    //Delete
-    for (const deleteItem of deleteComFinal) {
-      if (deleteItem._bp_lineitems.length > 0) {
-        fetch(`http://localhost:8000/blockInfo/delete/${params.id}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            bpName: "Commissioning Activities",
-            record_no: deleteItem.record_no,
-            _bp_lineitems: deleteItem._bp_lineitems.join(),
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setTestCount((prev) => prev++);
-          });
-      }
-    }
-
-    for (const deleteItem of deleteTopFinal) {
-      if (deleteItem._bp_lineitems.length > 0) {
-        fetch(`http://localhost:8000/blockInfo/delete/${params.id}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            bpName: "Turnover Packages",
-            record_no: deleteItem.record_no,
-            _bp_lineitems: deleteItem._bp_lineitems.join(),
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setTestCount((prev) => prev++);
-          });
-      }
-    }
-    //Fixed
-    for (const fixed of fixedComItem) {
-      fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bpName: "Commissioning Activities",
-          data: fixed,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setTestCount((prev) => prev + 1);
-        });
-    }
-
-    for (const fixed of fixedTopItem) {
-      fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ bpName: "Turnover Packages", data: fixed }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setTestCount((prev) => prev + 1);
-        });
-    }
-  };
-
-  const [testCount, setTestCount] = useState(0);
-
-  const rePositioning = () => {
-    const diagram = diagramRef.current?.getDiagram();
-
-    const rePositionData = JSON.parse(diagram.model.toJson());
-
-    const rePositionNodeData = rePositionData.nodeDataArray.map((com) => {
-      return {
-        ...com,
-        loc:
-          Math.round(Number(com.loc.split(" ")[0]) / 100) * 100 +
-          " " +
-          Math.round(Number(com.loc.split(" ")[1]) / 100) * 100,
-      };
-    });
-
-    const rePositionLinkData = rePositionData.linkDataArray.map((com) => {
-      return {
-        from: com.from,
-        to: com.to,
-      };
-    });
-
-    rePositionData.nodeDataArray = rePositionNodeData;
-    rePositionData.linkDataArray = rePositionLinkData;
-    diagram.model = go.Model.fromJson(JSON.stringify(rePositionData));
-  };
-
-  const handleInsertDateData = (e) => {
-    const { value, name } = e.target;
-
-    if (name === "ddd_evm_plan_finish") {
-      if (insertData.ddd_evm_plan_start.length > 0) {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            [name]: moment(new Date(value)).format("MM-DD-YYYY"),
-            uuu_P6PlannedDuration:
-              moment(new Date(value)).diff(
-                moment(new Date(prev.ddd_evm_plan_start)),
-                "days"
-              ) + 1,
-          };
-        });
-      } else {
-        alert("Plan Date 시작일을 지정하여 주시기 바랍니다.");
-      }
-    } else if (name === "ddd_evm_plan_finish") {
-      if (insertData.ddd_evm_actual_start.length > 0) {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            [name]: moment(new Date(value)).format("MM-DD-YYYY"),
-            uuu_P6ActualDuration:
-              moment(new Date(value)).diff(
-                moment(new Date(prev.ddd_evm_actual_start)),
-                "days"
-              ) + 1,
-          };
-        });
-      } else {
-        alert("Acutall Date 시작일을 지정하여 주시기 바랍니다.");
-      }
-    } else {
-      setInsertData((prev) => {
-        return {
-          ...prev,
-          [name]: moment(new Date(value)).format("MM-DD-YYYY"),
-        };
-      });
-    }
-  };
-
-  const clickDeletedCard = (cardInfo) => {
-    if (cardInfo.status === "Deleted") {
-      setModalToggleCN(true);
-      if (cardInfo.dtsDashBlockCategory !== "TOP") {
-        setModalComToggle(true);
-        setModalComInfo(cardInfo);
-      } else {
-        setModalTopToggle(true);
-        setModalTopInfo(cardInfo);
-      }
-    } else {
-      alert("이미 필드에 존재하는 Card입니다.");
-    }
-  };
-
-  const closedModal = () => {
-    setModalToggleCN(false);
-    setModalComInfo({ baseInsertComData });
-    setModalTopInfo({ baseInsertTopData });
-    setTimeout(() => {
-      setModalComToggle(false);
-      setModalTopToggle(false);
-    }, 500);
-  };
-
-  const changeCardStatus = (cardInfo) => {
-    // console.log(insertNodeData);
-    const diagram = diagramRef.current?.getDiagram();
-
-    const insertNodeData = JSON.parse(diagram.model.toJson());
-    if (cardInfo.dtsDashBlockCategory !== "TOP") {
-      const insertComNodeData = {
-        key: cardInfo.uuu_P6ActivityId,
-        category: cardInfo.dtsDashBlockCategory,
-        uuu_P6ActivityName: cardInfo.uuu_P6ActivityName,
-        planDate: "Plan Date",
-        ddd_evm_plan_start: moment(cardInfo.ddd_evm_plan_start).format(
-          "MM-DD-YYYY"
-        ),
-        ddd_evm_plan_finish: moment(cardInfo.ddd_evm_plan_finish).format(
-          "MM-DD-YYYY"
-        ),
-        uuu_P6PlannedDuration: cardInfo.uuu_P6PlannedDuration,
-        actualDate: "Actual Date",
-        ddd_evm_actual_start:
-          cardInfo.ddd_evm_actual_start !== null
-            ? moment(cardInfo.ddd_evm_actual_start).format("MM-DD-YYYY")
-            : null,
-        ddd_evm_actual_finish:
-          cardInfo.ddd_evm_actual_finish !== null
-            ? moment(cardInfo.ddd_evm_actual_finish).format("MM-DD-YYYY")
-            : null,
-        uuu_P6ActualDuration: cardInfo.uuu_P6ActualDuration,
-        record_no: cardInfo.record_no,
-      };
-
-      if (cardInfo._bp_lineitems !== null) {
-        cardInfo._bp_lineitems.forEach((com) => {
-          insertNodeData.linkDataArray.push({
-            from: cardInfo.uuu_P6ActivityId,
-            to: com.dtsCommActivityBPK,
-            dtsLineAutoSeq: com.dtsLineAutoSeq,
-          });
-        });
-      }
-
-      closedModal();
-
-      insertNodeData.nodeDataArray.push(insertComNodeData);
-
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
-    } else {
-      const insertTopData = {
-        key: cardInfo.dtsTOPCode,
-        category: "Top",
-        uuu_P6ActivityName: cardInfo.dtsTOPTitle,
-        planDate: "Plan Date",
-        ddd_evm_plan_start: moment(cardInfo.dtsPlanHODate).format("MM-DD-YYYY"),
-        actualDate: "Actual Date",
-        ddd_evm_actual_start:
-          cardInfo.dtsActualHODate !== null
-            ? moment(cardInfo.dtsActualHODate).format("MM-DD-YYYY")
-            : null,
-        record_no: cardInfo.record_no,
-      };
-
-      if (cardInfo._bp_lineitems !== null) {
-        cardInfo._bp_lineitems.forEach((com) => {
-          insertNodeData.linkDataArray.push({
-            from: cardInfo.dtsTOPCode,
-            to: com.uuu_P6ActivityId,
-            dtsLineAutoSeq: com.dtsLineAutoSeq,
-          });
-        });
-      }
-
-      closedModal();
-
-      insertNodeData.nodeDataArray.push(insertTopData);
-
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
-    }
-  };
-
   return (
-    <>
-      <div className="blockInsert">
-        <ReactDiagram
-          ref={diagramRef}
-          initDiagram={initDiagram}
-          divClassName="diagram-component"
-        />
-        <ReactOverview
-          initOverview={initOverview}
-          divClassName="overview-component"
-          observedDiagram={
-            (loadModelData && diagramRef.current?.getDiagram()) || null
-          }
-        />
-        <div className="buttonBox9"></div>
-
-        <div className="blockInsertBox">
-          <div className="blockInsertBoxTitle">Card 추가하기</div>
-          <select
-            name="category"
-            defaultValue="Commissioning Low"
-            onChange={handleInsertData}
-          >
-            <option value="" disabled>
-              Card를 선택해주세요
-            </option>
-            <option>Commissioning High</option>
-            <option>Commissioning Medium</option>
-            <option>Commissioning Low</option>
-            <option>Turn-Over Package</option>
-          </select>
-          {insertDataToggle ? (
-            <ComCardInsert
-              insertData={insertData}
-              handleInsertData={handleInsertData}
-              handleInsertDateData={handleInsertDateData}
-              comOriginalData={comOriginalData}
-              topOriginalData={topOriginalData}
-              clickDeletedCard={clickDeletedCard}
-              diagramRef={diagramRef}
-            />
-          ) : (
-            <TopCardInsert
-              insertTopData={insertTopData}
-              handleInsertTopData={handleInsertTopData}
-              comOriginalData={comOriginalData}
-              topOriginalData={topOriginalData}
-              diagramRef={diagramRef}
-            />
-          )}
-          <div className="InsertButtonBox">
-            <button onClick={InsertBlockData}>Insert</button>
-            <button onClick={finalDataSave}>Save</button>
-            <button onClick={rePositioning}>Re Positioning</button>
-          </div>
-          {modalComToggle && (
-            <div className="blockInsertModal">
-              <div
-                className="blockInsertModalBackground"
-                onClick={closedModal}
-              />
-              <div className="blockInsertModalContents">
-                <div className="blockInsertModalContentsBox">
-                  <div className="blockInsertModalContentsTitle">
-                    비활성화된 Card 정보 입니다.
-                  </div>
-                  <div className="blockInsertModalBox">
-                    <div className="blockInsertModalTitle">
-                      {modalComInfo.uuu_P6ActivityName}
-                    </div>
-                    <div className="blockInsertModalDate">Plan Date</div>
-                    <div className="blockInsertModalDateBox">
-                      <div
-                        className="blockInsertModalDateBoxDate"
-                        style={{
-                          backgroundColor:
-                            modalComInfo.dtsDashBlockCategory === "High"
-                              ? "#F8BBD0"
-                              : modalComInfo.dtsDashBlockCategory === "Medium"
-                              ? "#B3E5FC"
-                              : "white",
-                        }}
-                      >
-                        <div>
-                          {modalComInfo.ddd_evm_plan_start !== null
-                            ? moment(modalComInfo.ddd_evm_plan_start).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                        <div>
-                          {modalComInfo.ddd_evm_plan_finish !== null
-                            ? moment(modalComInfo.ddd_evm_plan_finish).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                      </div>
-                      <div className="blockInsertModalDateBoxDuration">
-                        {modalComInfo.uuu_P6PlannedDuration}
-                      </div>
-                    </div>
-                    <div className="blockInsertModalDate">Actual Date</div>
-                    <div className="blockInsertModalDateBox">
-                      <div
-                        className="blockInsertModalDateBoxDate actual"
-                        style={{
-                          backgroundColor:
-                            modalComInfo.dtsDashBlockCategory === "High"
-                              ? "#F8BBD0"
-                              : modalComInfo.dtsDashBlockCategory === "Medium"
-                              ? "#B3E5FC"
-                              : "white",
-                        }}
-                      >
-                        <div>
-                          {modalComInfo.ddd_evm_actual_start !== null
-                            ? moment(modalComInfo.ddd_evm_actual_start).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                        <div>
-                          {modalComInfo.ddd_evm_actual_finish !== null
-                            ? moment(modalComInfo.ddd_evm_actual_finish).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                      </div>
-                      <div className="blockInsertModalDateBoxDuration">
-                        {modalComInfo.uuu_P6ActualDuration}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="blockInsertModalContentsButtonBox">
-                    <button onClick={closedModal}>취소</button>
-                    <button onClick={() => changeCardStatus(modalComInfo)}>
-                      사용
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          {modalTopToggle && (
-            <div className="blockInsertModal">
-              <div
-                className="blockInsertModalBackground"
-                onClick={closedModal}
-              />
-              <div className="blockInsertModalContents">
-                <div className="blockInsertModalContentsBox">
-                  <div className="blockInsertModalContentsTitle">
-                    비활성화된 Card 정보 입니다.
-                  </div>
-                  <div className="blockInsertModalBox">
-                    <div className="blockSampleKey">
-                      {modalTopInfo.dtsTOPCode}
-                    </div>
-                    <div className="blockInsertModalTitle">
-                      {modalTopInfo.dtsTOPTitle}
-                    </div>
-                    <div className="blockInsertModalDate">Plan Date</div>
-                    <div className="blockInsertModalDateBox">
-                      <div className="blockInsertModalDateBoxDateTop">
-                        <div>
-                          {modalTopInfo.dtsPlanHODate !== null
-                            ? moment(modalTopInfo.dtsPlanHODate).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="blockInsertModalDate">Actual Date</div>
-                    <div className="blockInsertModalDateBox">
-                      <div className="blockInsertModalDateBoxDateTop">
-                        <div>
-                          {modalTopInfo.dtsActualHODate !== null
-                            ? moment(modalTopInfo.dtsActualHODate).format(
-                                "MM-DD-YYYY"
-                              )
-                            : null}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="blockInsertModalContentsButtonBox">
-                    <button onClick={closedModal}>취소</button>
-                    <button onClick={() => changeCardStatus(modalTopInfo)}>
-                      사용
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
+    <div className="blockView">
+      <ReactDiagram
+        ref={diagramRef}
+        initDiagram={initDiagram}
+        divClassName="diagram-component"
+      />
+      <ReactOverview
+        initOverview={initOverview}
+        divClassName="overview-component"
+        observedDiagram={
+          (loadModelData && diagramRef.current?.getDiagram()) || null
+        }
+      />
+    </div>
   );
 };
 
-export default BlockInsert;
+export default BlockView;
 
-const baseInsertComData = {
-  key: "",
-  category: "Low",
-  uuu_P6ActivityName: "",
-  planDate: "Plan Date",
-  ddd_evm_plan_start: "",
-  ddd_evm_plan_finish: "",
-  uuu_P6PlannedDuration: 0,
-  actualDate: "Actual Date",
-  ddd_evm_actual_start: "",
-  ddd_evm_actual_finish: "",
-  uuu_P6ActualDuration: 0,
-  record_no: "",
-};
+// <button id="SaveButton" className="saveButton" onClick={save}>
+//           Save
+//         </button>
+//         <button className="loadButton" onClick={load}>
+//           Load
+//         </button>
+//         <button id="FirstButton" name="first" onClick={filtering}>
+//           First
+//         </button>
+//         <button id="SecondButton" name="second" onClick={filtering}>
+//           Second
+//         </button>
+//         <button id="ThirdButton" name="third" onClick={filtering}>
+//           Third
+//         </button>
+//         <button id="ResetButton" name="reset" onClick={filtering}>
+//           Reset
+//         </button>
 
-const baseInsertTopData = {
-  key: "",
-  category: "Top",
-  uuu_P6ActivityName: "",
-  planDate: "Plan Date",
-  ddd_evm_plan_start: "",
-  actualDate: "Actual Date",
-  ddd_evm_actual_start: "",
-  record_no: "",
-};
+// const [modelData, setModalDate] = useState({
+//   class: "GraphLinksModel",
+//   nodeDataArray: [],
+//   linkDataArray: [],
+// });
+
+// const save = () => {
+//   const diagram = diagramRef.current?.getDiagram();
+
+//   setModalDate({
+//     ...modelData,
+//     nodeDataArray: JSON.parse(diagram.model.toJson()).nodeDataArray,
+//     linkDataArray: JSON.parse(diagram.model.toJson()).linkDataArray,
+//   });
+//   diagram.isModified = false;
+
+//   console.log(JSON.parse(diagram.model.toJson()));
+// };
+
+// const load = () => {
+//   const diagram = diagramRef.current?.getDiagram();
+//   diagram.model = go.Model.fromJson(JSON.stringify(modelData));
+// };
+
+// const filtering = (e) => {
+//   const diagram = diagramRef.current?.getDiagram();
+
+//   if (e.target.name === "reset") {
+//     diagram.model = go.Model.fromJson(JSON.stringify(modelData));
+//   } else {
+//     let filteringModel = { ...modelData };
+//     const filterNodeDataArray = modelData.nodeDataArray.filter((com) => {
+//       return com.category === e.target.name;
+//     });
+
+//     filteringModel.nodeDataArray = filterNodeDataArray;
+
+//     const linkFilterArray = modelData.nodeDataArray.filter((com) => {
+//       return com.category !== e.target.name;
+//     });
+
+//     const test0 = linkFilterArray.map((com) => com.key);
+
+//     const test1 = modelData.linkDataArray.filter((com) => {
+//       return test0.some((com2) => {
+//         return com.to === com2;
+//       });
+//     });
+
+//     const test2 = modelData.linkDataArray.filter((com) => {
+//       return test0.some((com2) => {
+//         return com.from === com2;
+//       });
+//     });
+
+//     const totalTest = [];
+
+//     test1.map((com) => {
+//       return totalTest.push(com);
+//     });
+
+//     test2.map((com) => {
+//       return totalTest.push(com);
+//     });
+
+//     const totalTestResult = [...new Set(totalTest)];
+
+//     const linkDataArrayResult = [...modelData.linkDataArray].filter(
+//       (com) => !totalTestResult.includes(com)
+//     );
+
+//     filteringModel.linkDataArray = linkDataArrayResult;
+
+//     diagram.model = go.Model.fromJson(JSON.stringify(filteringModel));
+//   }
+// };

@@ -1,22 +1,32 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import moment from "moment";
 
-const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
+const ComCardInsert = ({
+  insertData,
+  handleInsertData,
+  handleInsertDateData,
+  diagramRef,
+  comOriginalData,
+  topOriginalData,
+  clickDeletedCard,
+}) => {
   const keyRef = useRef();
+  const [checkKey, setCheckKey] = useState([]);
+
+  useEffect(() => {
+    setCheckKey(comOriginalData.concat(topOriginalData));
+  }, [comOriginalData, topOriginalData]);
 
   const checkCardKey = (e) => {
-    const diagram = diagramRef.current?.getDiagram();
-
-    const nodeDataArray = JSON.parse(diagram.model.toJson()).nodeDataArray;
-
-    const checkKeyValue = nodeDataArray.some((com) => {
-      return com.key === e.target.value;
-    });
-
-    if (checkKeyValue) {
-      alert("중복된 Card Key값이 있습니다.");
-      keyRef.current.focus();
-      keyRef.current.value = "";
+    if (e.target.value.length !== 0) {
+      const filterKey = comOriginalData
+        .concat(topOriginalData)
+        .filter((com) =>
+          com.uuu_P6ActivityId.includes(e.target.value.toUpperCase())
+        );
+      setCheckKey(filterKey);
+    } else {
+      setCheckKey(comOriginalData.concat(topOriginalData));
     }
   };
 
@@ -88,12 +98,37 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
             type="text"
             className="blockDataInsertTitle"
             name="key"
-            onChange={handleInsertData}
+            onChange={(e) => {
+              handleInsertData(e);
+              checkCardKey(e);
+            }}
             value={insertData.key}
-            onBlur={checkCardKey}
             ref={keyRef}
           />
         </div>
+        {/* {insertData.key.length !== 0 && ( */}
+        <div className="checkList">
+          {checkKey.length > 0 ? (
+            checkKey.map((com, idx) => {
+              return (
+                <div
+                  className="checkListBox"
+                  key={idx}
+                  onClick={() => clickDeletedCard(com)}
+                >
+                  <div>{com.uuu_P6ActivityId}</div>
+                  <div>{com.status}</div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="checkListBox">
+              <div>사용가능한 Card Key 입니다.</div>
+            </div>
+          )}
+        </div>
+        {/* )} */}
+
         <div className="blockDataInsert">
           <div>Card Title: </div>
           <input
@@ -109,7 +144,7 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
           <input
             type="date"
             name="ddd_evm_plan_start"
-            onChange={handleInsertData}
+            onChange={handleInsertDateData}
             value={
               insertData.ddd_evm_plan_start.length > 0
                 ? moment(new Date(insertData.ddd_evm_plan_start)).format(
@@ -124,7 +159,7 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
           <input
             type="date"
             name="ddd_evm_plan_finish"
-            onChange={handleInsertData}
+            onChange={handleInsertDateData}
             value={
               insertData.ddd_evm_plan_finish.length > 0
                 ? moment(new Date(insertData.ddd_evm_plan_finish)).format(
@@ -139,7 +174,7 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
           <input
             type="date"
             name="ddd_evm_actual_start"
-            onChange={handleInsertData}
+            onChange={handleInsertDateData}
             value={
               insertData.ddd_evm_actual_start.length > 0
                 ? moment(new Date(insertData.ddd_evm_actual_start)).format(
@@ -154,7 +189,7 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
           <input
             type="date"
             name="ddd_evm_actual_finish"
-            onChange={handleInsertData}
+            onChange={handleInsertDateData}
             value={
               insertData.ddd_evm_actual_finish.length > 0
                 ? moment(new Date(insertData.ddd_evm_actual_finish)).format(
