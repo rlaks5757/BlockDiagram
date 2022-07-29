@@ -1,50 +1,60 @@
-import React, { useRef } from "react";
+import React from "react";
 import moment from "moment";
+import { DatePicker } from "@progress/kendo-react-dateinputs";
 
-const TopCardInsert = ({ insertTopData, handleInsertTopData, diagramRef }) => {
-  const keyRef = useRef();
-
-  const checkCardKey = (e) => {
-    const diagram = diagramRef.current?.getDiagram();
-
-    const nodeDataArray = JSON.parse(diagram.model.toJson()).nodeDataArray;
-
-    const checkKeyValue = nodeDataArray.some((com) => {
-      return com.key === e.target.value;
-    });
-
-    if (checkKeyValue) {
-      alert("중복된 Card Key값이 있습니다.");
-      keyRef.current.focus();
-      keyRef.current.value = "";
+const TopCardInsert = ({
+  insertTopData,
+  handleInsertTopData,
+  setInsertTopData,
+}) => {
+  const handleDateFicker = ({ value }, name) => {
+    if (name === "uuu_P6ActivityName") {
+      setInsertTopData((prev) => {
+        return {
+          ...prev,
+          [name]: value,
+        };
+      });
+    } else if (name === "key") {
+      setInsertTopData((prev) => {
+        return {
+          ...prev,
+          key: value.toUpperCase(),
+        };
+      });
+    } else {
+      setInsertTopData((prev) => {
+        return {
+          ...prev,
+          [name]: moment(new Date(value)).format("MM-DD-YYYY"),
+        };
+      });
     }
   };
 
   return (
     <>
-      <div className="blockSampleCom">
-        <div className="blockSampleKey">{insertTopData.key}</div>
-        <div className="blockSampleTitle">
-          {insertTopData.uuu_P6ActivityName}
-        </div>
-        <div className="blockSampleDate">{insertTopData.planDate}</div>
-        <div className="blockSampleDateBox">
-          <div className="blockSampleDateBoxDateTop">
-            <div>
-              {insertTopData.ddd_evm_plan_start.length > 0
-                ? insertTopData.ddd_evm_plan_start
-                : ""}
-            </div>
+      <div className="blockInsertModalInsertBox">
+        <div className="blockInsertModalSample">
+          <div className="lockInsertModalSampleKey">{insertTopData.key}</div>
+          <div className="blockInsertModalSampleTitle">
+            {insertTopData.uuu_P6ActivityName}
           </div>
-        </div>
-        <div className="blockSampleDate">{insertTopData.actualDate}</div>
-        <div className="blockSampleDateBox">
-          <div className="blockSampleDateBoxDateTop">
-            <div>
-              {insertTopData.ddd_evm_actual_start.length > 0
-                ? insertTopData.ddd_evm_actual_start
-                : ""}
-            </div>
+          <div className="blockInsertModalSampleDate">
+            {insertTopData.planDate}
+          </div>
+          <div className="blockInsertModalSampleDateTop">
+            {insertTopData.ddd_evm_plan_start.length > 0
+              ? insertTopData.ddd_evm_plan_start
+              : ""}
+          </div>
+          <div className="blockInsertModalSampleDate">
+            {insertTopData.actualDate}
+          </div>
+          <div className="blockInsertModalSampleDateTop">
+            {insertTopData.ddd_evm_actual_start.length > 0
+              ? insertTopData.ddd_evm_actual_start
+              : ""}
           </div>
         </div>
       </div>
@@ -57,8 +67,6 @@ const TopCardInsert = ({ insertTopData, handleInsertTopData, diagramRef }) => {
             name="key"
             onChange={handleInsertTopData}
             value={insertTopData.key}
-            onBlur={checkCardKey}
-            ref={keyRef}
           />
         </div>
         <div className="blockDataInsert">
@@ -73,32 +81,24 @@ const TopCardInsert = ({ insertTopData, handleInsertTopData, diagramRef }) => {
         </div>
         <div className="blockDataInsert">
           <div>Plan Date Start: </div>
-          <input
-            type="date"
-            name="ddd_evm_plan_start"
-            onChange={handleInsertTopData}
+          <DatePicker
             value={
               insertTopData.ddd_evm_plan_start.length > 0
-                ? moment(new Date(insertTopData.ddd_evm_plan_start)).format(
-                    "YYYY-MM-DD"
-                  )
+                ? new Date(insertTopData.ddd_evm_plan_start)
                 : ""
             }
+            onChange={(e) => handleDateFicker(e, "ddd_evm_plan_start")}
           />
         </div>
         <div className="blockDataInsert">
           <div>Actual Date Start: </div>
-          <input
-            type="date"
-            name="ddd_evm_actual_start"
-            onChange={handleInsertTopData}
+          <DatePicker
             value={
               insertTopData.ddd_evm_actual_start.length > 0
-                ? moment(new Date(insertTopData.ddd_evm_actual_start)).format(
-                    "YYYY-MM-DD"
-                  )
+                ? new Date(insertTopData.ddd_evm_actual_start)
                 : ""
             }
+            onChange={(e) => handleDateFicker(e, "ddd_evm_actual_start")}
           />
         </div>
       </div>

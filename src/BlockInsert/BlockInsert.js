@@ -3,14 +3,22 @@ import { useParams } from "react-router-dom";
 import * as go from "gojs";
 import { ReactDiagram, ReactOverview } from "gojs-react";
 import moment from "moment";
+import {
+  Dialog,
+  DialogActionsBar,
+  Window,
+} from "@progress/kendo-react-dialogs";
+
 import "./BlockInsert.scss";
 import ComCardInsert from "./ComCardInsert/ComCardInsert";
 import TopCardInsert from "./ComCardInsert/TopCardInsert";
 import axios from "axios";
 import ComModal from "./ComCardInsert/ComModal";
 import TopModal from "./ComCardInsert/TopModal";
+import InsertModal from "./TotalLayOut";
+import "./InsertModal.scss";
 
-const BlockInsert = () => {
+const BlockInsert = ({ tableData, setTableData }) => {
   const params = useParams();
   const [originalComBaseSet, setOriginalComBaseSet] = useState({});
   const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
@@ -25,12 +33,6 @@ const BlockInsert = () => {
   const [insertTopData, setInsertTopData] = useState(baseInsertTopData);
 
   const [loadModelData, setLoadModelData] = useState(false);
-
-  const [modalComToggle, setModalComToggle] = useState(false);
-  const [modalTopToggle, setModalTopToggle] = useState(false);
-  const [modalToggleCN, setModalToggleCN] = useState(false);
-  const [modalComInfo, setModalComInfo] = useState({});
-  const [modalTopInfo, setModalTopInfo] = useState({});
 
   const diagramRef = useRef();
 
@@ -1117,6 +1119,8 @@ const BlockInsert = () => {
         `http://localhost:8000/blockInfo/${params.id}`
       );
 
+      setTableData(fetchData.data);
+
       const comData = await fetchData.data.com;
 
       // const topFetchData = await axios.get("/data/top.json");
@@ -1300,12 +1304,27 @@ const BlockInsert = () => {
         };
       });
     } else if (name === "key") {
-      setInsertData((prev) => {
-        return {
-          ...prev,
-          key: value.toUpperCase(),
-        };
-      });
+      const checkItem = tableData.com.find(
+        (com) => com.uuu_P6ActivityId === value.toUpperCase()
+      );
+
+      console.log(checkItem);
+      if (checkItem === undefined) {
+        setInsertData((prev) => {
+          return {
+            ...prev,
+            key: value.toUpperCase(),
+          };
+        });
+      } else {
+        setInsertData((prev) => {
+          return {
+            ...prev,
+            key: value.toUpperCase(),
+            record_no: checkItem.record_no,
+          };
+        });
+      }
     } else if (name === "category") {
       if (value === "Turn-Over Package") {
         setInsertDataToogle(false);
@@ -1799,154 +1818,10 @@ const BlockInsert = () => {
     diagram.model = go.Model.fromJson(JSON.stringify(rePositionData));
   };
 
-  const handleInsertDateData = (e) => {
-    const { value, name } = e.target;
+  const [visibleDialog, setVisibleDialog] = useState(true);
 
-    if (name === "ddd_evm_plan_finish") {
-      if (insertData.ddd_evm_plan_start.length > 0) {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            [name]: moment(new Date(value)).format("MM-DD-YYYY"),
-            uuu_P6PlannedDuration:
-              moment(new Date(value)).diff(
-                moment(new Date(prev.ddd_evm_plan_start)),
-                "days"
-              ) + 1,
-          };
-        });
-      } else {
-        alert("Plan Date 시작일을 지정하여 주시기 바랍니다.");
-      }
-    } else if (name === "ddd_evm_plan_finish") {
-      if (insertData.ddd_evm_actual_start.length > 0) {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            [name]: moment(new Date(value)).format("MM-DD-YYYY"),
-            uuu_P6ActualDuration:
-              moment(new Date(value)).diff(
-                moment(new Date(prev.ddd_evm_actual_start)),
-                "days"
-              ) + 1,
-          };
-        });
-      } else {
-        alert("Acutall Date 시작일을 지정하여 주시기 바랍니다.");
-      }
-    } else {
-      setInsertData((prev) => {
-        return {
-          ...prev,
-          [name]: moment(new Date(value)).format("MM-DD-YYYY"),
-        };
-      });
-    }
-  };
-
-  const clickDeletedCard = (cardInfo) => {
-    if (cardInfo.status === "Deleted") {
-      setModalToggleCN(true);
-      if (cardInfo.dtsDashBlockCategory !== "TOP") {
-        setModalComToggle(true);
-        setModalComInfo(cardInfo);
-      } else {
-        setModalTopToggle(true);
-        setModalTopInfo(cardInfo);
-      }
-    } else {
-      alert("이미 필드에 존재하는 Card입니다.");
-    }
-  };
-
-  const closedModal = () => {
-    setModalToggleCN(false);
-    setModalComInfo({ baseInsertComData });
-    setModalTopInfo({ baseInsertTopData });
-    setTimeout(() => {
-      setModalComToggle(false);
-      setModalTopToggle(false);
-    }, 500);
-  };
-
-  const changeCardStatus = (cardInfo) => {
-    // console.log(insertNodeData);
-    const diagram = diagramRef.current?.getDiagram();
-
-    const insertNodeData = JSON.parse(diagram.model.toJson());
-    if (cardInfo.dtsDashBlockCategory !== "TOP") {
-      const insertComNodeData = {
-        key: cardInfo.uuu_P6ActivityId,
-        category: cardInfo.dtsDashBlockCategory,
-        uuu_P6ActivityName: cardInfo.uuu_P6ActivityName,
-        planDate: "Plan Date",
-        ddd_evm_plan_start: moment(cardInfo.ddd_evm_plan_start).format(
-          "MM-DD-YYYY"
-        ),
-        ddd_evm_plan_finish: moment(cardInfo.ddd_evm_plan_finish).format(
-          "MM-DD-YYYY"
-        ),
-        uuu_P6PlannedDuration: cardInfo.uuu_P6PlannedDuration,
-        actualDate: "Actual Date",
-        ddd_evm_actual_start:
-          cardInfo.ddd_evm_actual_start !== null
-            ? moment(cardInfo.ddd_evm_actual_start).format("MM-DD-YYYY")
-            : null,
-        ddd_evm_actual_finish:
-          cardInfo.ddd_evm_actual_finish !== null
-            ? moment(cardInfo.ddd_evm_actual_finish).format("MM-DD-YYYY")
-            : null,
-        uuu_P6ActualDuration: cardInfo.uuu_P6ActualDuration,
-        record_no: cardInfo.record_no,
-      };
-
-      if (cardInfo._bp_lineitems !== undefined) {
-        cardInfo._bp_lineitems.forEach((com) => {
-          insertNodeData.linkDataArray.push({
-            from: cardInfo.uuu_P6ActivityId,
-            to: com.dtsCommActivityBPK,
-            dtsLineAutoSeq: com.dtsLineAutoSeq,
-          });
-        });
-      }
-
-      closedModal();
-
-      insertNodeData.nodeDataArray.push(insertComNodeData);
-
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
-    } else {
-      const insertTopData = {
-        key: cardInfo.dtsTOPCode,
-        category: "Top",
-        uuu_P6ActivityName: cardInfo.dtsTOPTitle,
-        planDate: "Plan Date",
-        ddd_evm_plan_start: moment(cardInfo.dtsPlanHODate).format("MM-DD-YYYY"),
-        actualDate: "Actual Date",
-        ddd_evm_actual_start:
-          cardInfo.dtsActualHODate !== null
-            ? moment(cardInfo.dtsActualHODate).format("MM-DD-YYYY")
-            : null,
-        record_no: cardInfo.record_no,
-      };
-
-      if (cardInfo._bp_lineitems !== undefined) {
-        console.log(cardInfo._bp_lineitems);
-        cardInfo._bp_lineitems.forEach((com) => {
-          insertNodeData.linkDataArray.push({
-            from: cardInfo.dtsTOPCode,
-            to: com.uuu_P6ActivityId,
-            dtsLineAutoSeq: com.dtsLineAutoSeq,
-          });
-        });
-      }
-
-      closedModal();
-
-      insertNodeData.nodeDataArray.push(insertTopData);
-
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
-    }
+  const toggleDialog = () => {
+    setVisibleDialog(!visibleDialog);
   };
 
   return (
@@ -1964,69 +1839,66 @@ const BlockInsert = () => {
             (loadModelData && diagramRef.current?.getDiagram()) || null
           }
         />
-        <div className="buttonBox9"></div>
 
-        <div className="blockInsertBox">
-          <div className="blockInsertBoxTitle">Card 추가하기</div>
-          <select
-            name="category"
-            defaultValue="Commissioning Low"
-            onChange={handleInsertData}
-          >
-            <option value="" disabled>
-              Card를 선택해주세요
-            </option>
-            <option>Commissioning High</option>
-            <option>Commissioning Medium</option>
-            <option>Commissioning Low</option>
-            <option>Turn-Over Package</option>
-          </select>
-          {insertDataToggle ? (
-            <ComCardInsert
-              insertData={insertData}
-              handleInsertData={handleInsertData}
-              handleInsertDateData={handleInsertDateData}
-              comOriginalData={comOriginalData}
-              topOriginalData={topOriginalData}
-              clickDeletedCard={clickDeletedCard}
-              diagramRef={diagramRef}
-            />
-          ) : (
-            <TopCardInsert
-              insertTopData={insertTopData}
-              handleInsertTopData={handleInsertTopData}
-              comOriginalData={comOriginalData}
-              topOriginalData={topOriginalData}
-              diagramRef={diagramRef}
-            />
-          )}
-          <div className="controlButtonBox">
-            <button>추가하기</button>
-            <button>저장하기</button>
-          </div>
-
-          <div className="InsertButtonBox">
-            <button onClick={InsertBlockData}>Insert</button>
-            <button onClick={finalDataSave}>Save</button>
-            <button onClick={rePositioning}>Re Positioning</button>
-          </div>
-          {modalComToggle && (
-            <ComModal
-              modalComInfo={modalComInfo}
-              modalToggleCN={modalToggleCN}
-              closedModal={closedModal}
-              changeCardStatus={changeCardStatus}
-            />
-          )}
-          {modalTopToggle && (
-            <TopModal
-              modalTopInfo={modalTopInfo}
-              modalToggleCN={modalToggleCN}
-              closedModal={closedModal}
-              changeCardStatus={changeCardStatus}
-            />
-          )}
+        <div className="controlButtonBox">
+          <button onClick={rePositioning}>Re Positioning</button>
+          <button onClick={toggleDialog}>추가하기</button>
+          <button onClick={finalDataSave}>저장하기</button>
         </div>
+
+        {visibleDialog && (
+          <Dialog title={"Card Add"} onClose={toggleDialog}>
+            <div className="blockInsertModal">
+              <select
+                name="category"
+                defaultValue="Commissioning Low"
+                onChange={handleInsertData}
+                className="blockInsertModalSelect"
+              >
+                <option value="" disabled>
+                  Card를 선택해주세요
+                </option>
+                <option>Commissioning High</option>
+                <option>Commissioning Medium</option>
+                <option>Commissioning Low</option>
+                <option>Turn-Over Package</option>
+              </select>
+              {insertDataToggle ? (
+                <ComCardInsert
+                  insertData={insertData}
+                  setInsertData={setInsertData}
+                  handleInsertData={handleInsertData}
+                />
+              ) : (
+                <TopCardInsert
+                  insertTopData={insertTopData}
+                  setInsertTopData={setInsertTopData}
+                  handleInsertTopData={handleInsertTopData}
+                />
+              )}
+            </div>
+
+            <DialogActionsBar>
+              <button
+                className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
+                onClick={() => {
+                  toggleDialog();
+                }}
+              >
+                취소
+              </button>
+              <button
+                className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
+                onClick={() => {
+                  toggleDialog();
+                  InsertBlockData();
+                }}
+              >
+                추가
+              </button>
+            </DialogActionsBar>
+          </Dialog>
+        )}
       </div>
     </>
   );
