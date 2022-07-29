@@ -34,279 +34,53 @@
       padding: 5px 10px;
     }
   }
-
-  .blockSampleModal {
-    width: 100%;
-
-    .blockInsertBox {
-      width: 300px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .blockInsertBoxTitle {
-        margin-bottom: 10px;
-      }
-
-      select {
-        text-align: center;
-        width: 80%;
-      }
-
-      .blockSampleCom {
-        margin-top: 20px;
-        border: 2px solid black;
-        border-radius: 5px;
-        width: 125px;
-
-        div {
-          font-size: 10px;
-          font-family: helvetica, arial, sans-serif;
-        }
-
-        .blockSampleKey {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 25px;
-        }
-
-        .blockSampleTitle {
-          text-align: center;
-          margin: 0 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 75px;
-          word-break: break-all;
-        }
-
-        .blockSampleDate {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-top: 1px solid black;
-          border-bottom: 1px solid black;
-          height: 25px;
-        }
-
-        .blockSampleDateBox {
-          display: flex;
-
-          .blockSampleDateBoxDate {
-            width: 90px;
-            border-right: 1px solid black;
-
-            div {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: 25px;
-            }
-          }
-          .blockSampleDateBoxDuration {
-            width: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .blockSampleDateBoxDate.actual {
-            border-radius: 0 0 0 10px;
-          }
-
-          .blockSampleDateBoxDateTop {
-            width: 125px;
-
-            div {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: 25px;
-            }
-          }
-        }
-      }
-
-      .blockDataInsertBox {
-        margin-top: 20px;
-        width: 280px;
-
-        .blockDataInsert {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: space-between;
-          margin-bottom: 10px;
-
-          .blockDataInsertTitle {
-            width: 100%;
-          }
-        }
-
-        .checkList {
-          border: 1px solid gray;
-          border-radius: 10px;
-          padding: 0 5px;
-          max-height: 115px;
-          margin-bottom: 10px;
-          overflow: scroll;
-
-          .checkListBox {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            cursor: pointer;
-          }
-        }
-      }
-    }
-  }
-
-  .blockInsertModal {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    z-index: 200;
-
-    animation: fadein 0.5s ease-in;
-
-    .blockInsertModalBackground {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      z-index: 201;
-      background-color: rgba($color: #000000, $alpha: 0.5);
-    }
-
-    .blockInsertModalContents {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 202;
-      background-color: rgba($color: #fff, $alpha: 1);
-      border-radius: 10px;
-
-      .blockInsertModalContentsBox {
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-        .blockInsertModalContentsTitle {
-          font-size: 18px;
-        }
-
-        .blockInsertModalBox {
-          margin: 20px 0;
-          border: 2px solid black;
-          border-radius: 5px;
-          width: 170px;
-
-          div {
-            font-size: 14px;
-            font-family: helvetica, arial, sans-serif;
-          }
-
-          .blockSampleKey {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 25px;
-          }
-
-          .blockInsertModalTitle {
-            text-align: center;
-            margin: 0 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 125px;
-            word-break: break-all;
-          }
-
-          .blockInsertModalDate {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-top: 1px solid black;
-            border-bottom: 1px solid black;
-            height: 35px;
-          }
-
-          .blockInsertModalDateBox {
-            display: flex;
-
-            .blockInsertModalDateBoxDate {
-              width: 120px;
-              border-right: 1px solid black;
-
-              div {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 35px;
-              }
-            }
-            .blockInsertModalDateBoxDuration {
-              width: 50px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-
-            .blockInsertModalDateBoxDate.actual {
-              border-radius: 0 0 0 10px;
-            }
-
-            .blockInsertModalDateBoxDateTop {
-              width: 175px;
-
-              div {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 35px;
-              }
-            }
-          }
-        }
-      }
-    }
-    .blockInsertModalContentsTop {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 202;
-      background-color: rgba($color: #fff, $alpha: 1);
-    }
-  }
-
-  .blockInsertModal.close {
-    animation: fadeout 0.5s ease-in-out;
-  }
 }
 
 .blockInsert.close {
   display: none;
 }
 
-.buttonBox9 {
-  z-index: 99;
-  position: absolute;
-  left: 5px;
-  bottom: -50px;
-}
-
 button {
   margin-right: 10px;
+}
+
+.updateProgressBox {
+  .updateProgressResult {
+    margin-top: 10px;
+  }
+
+  .updateProgressTableBox {
+    .updateProgressTable {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+
+      .updateProgressFirst {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 10%;
+        padding: 5px 0;
+      }
+
+      .updateProgressSecond {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        width: 45%;
+        padding: 5px 0;
+      }
+
+      .updateProgressThrid {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 45%;
+        padding: 5px 0;
+      }
+    }
+  }
 }
 
 @keyframes fadein {

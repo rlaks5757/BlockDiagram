@@ -8,6 +8,7 @@ import {
   DialogActionsBar,
   Window,
 } from "@progress/kendo-react-dialogs";
+import { ProgressBar } from "@progress/kendo-react-progressbars";
 
 import "./BlockInsert.scss";
 import ComCardInsert from "./ComCardInsert/ComCardInsert";
@@ -17,6 +18,7 @@ import ComModal from "./ComCardInsert/ComModal";
 import TopModal from "./ComCardInsert/TopModal";
 import InsertModal from "./TotalLayOut";
 import "./InsertModal.scss";
+import { compileFilter } from "@progress/kendo-data-query";
 
 const BlockInsert = ({ tableData, setTableData }) => {
   const params = useParams();
@@ -24,7 +26,6 @@ const BlockInsert = ({ tableData, setTableData }) => {
   const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
 
   const [comOriginalData, setComOriginalData] = useState([]);
-  const [topOriginalData, setTopOriginalData] = useState([]);
 
   const [insertDataToggle, setInsertDataToogle] = useState(true);
 
@@ -33,6 +34,12 @@ const BlockInsert = ({ tableData, setTableData }) => {
   const [insertTopData, setInsertTopData] = useState(baseInsertTopData);
 
   const [loadModelData, setLoadModelData] = useState(false);
+
+  const [visibleDialog, setVisibleDialog] = useState(false);
+
+  const [progressActual, setProgressActual] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [progressTotal, setProgressTotal] = useState(0);
 
   const diagramRef = useRef();
 
@@ -1277,8 +1284,8 @@ const BlockInsert = ({ tableData, setTableData }) => {
       setOriginalComBaseSet(comBaseSet);
       setOriginalTopBaseSet(topBaseSet);
 
-      setComOriginalData(comID);
-      setTopOriginalData(topID);
+      setComOriginalData(comID.concat(topID));
+      // setTopOriginalData(topID);
       diagram.model = go.Model.fromJson(JSON.stringify(baseSet));
     } catch (err) {
       console.log(err);
@@ -1304,24 +1311,28 @@ const BlockInsert = ({ tableData, setTableData }) => {
         };
       });
     } else if (name === "key") {
-      const checkItem = tableData.com.find(
+      const checkItem = comOriginalData.find(
         (com) => com.uuu_P6ActivityId === value.toUpperCase()
       );
 
       console.log(checkItem);
-      if (checkItem === undefined) {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-          };
-        });
+      if (checkItem !== undefined) {
+        if (checkItem.status !== "Deleted") {
+          alert("이미 필드에 존재하는 Card입니다.");
+        } else {
+          setInsertData((prev) => {
+            return {
+              ...prev,
+              key: value.toUpperCase(),
+              record_no: checkItem.record_no,
+            };
+          });
+        }
       } else {
         setInsertData((prev) => {
           return {
             ...prev,
             key: value.toUpperCase(),
-            record_no: checkItem.record_no,
           };
         });
       }
@@ -1352,8 +1363,6 @@ const BlockInsert = ({ tableData, setTableData }) => {
       });
     }
   };
-
-  //여기에 넣을꺼임
 
   const handleInsertTopData = (e) => {
     const { value, name } = e.target;
@@ -1402,6 +1411,7 @@ const BlockInsert = ({ tableData, setTableData }) => {
   };
 
   const finalDataSave = async () => {
+    setProgressVisibleDialog(true);
     const diagram = await diagramRef.current?.getDiagram();
 
     const insertNodeData = await JSON.parse(diagram.model.toJson());
@@ -1697,6 +1707,25 @@ const BlockInsert = ({ tableData, setTableData }) => {
       originalTopdataID.includes(x.dtsTOPCode)
     );
 
+    const deleteComFinalCount = deleteComFinal.filter(
+      (com) => com._bp_lineitems.length > 0
+    );
+
+    const deleteTopFinalCount = deleteTopFinal.filter(
+      (com) => com._bp_lineitems.length > 0
+    );
+
+    setProgressTotal(
+      newComItem.length +
+        newTopItem.length +
+        deleteComFinalCount.length +
+        deleteTopFinalCount.length +
+        fixedComItem.length +
+        fixedTopItem.length
+    );
+
+    const errTotal = [];
+
     //oracle request
     //Input
     for (const inputItem of newComItem) {
@@ -1711,7 +1740,14 @@ const BlockInsert = ({ tableData, setTableData }) => {
         }),
       })
         .then((res) => res.json())
-        .then((data) => {});
+        .then((data) => {
+          setProgressActual((prev) => prev + 1);
+          if (data.data.status === 200) {
+            setProgress((prev) => prev + 1);
+          } else {
+            errTotal.push(data.data.message);
+          }
+        });
     }
 
     for (const inputItem of newTopItem) {
@@ -1723,7 +1759,14 @@ const BlockInsert = ({ tableData, setTableData }) => {
         body: JSON.stringify({ bpName: "Turnover Packages", data: inputItem }),
       })
         .then((res) => res.json())
-        .then((data) => {});
+        .then((data) => {
+          setProgressActual((prev) => prev + 1);
+          if (data.data.status === 200) {
+            setProgress((prev) => prev + 1);
+          } else {
+            errTotal.push(data.data.message);
+          }
+        });
     }
 
     //Delete
@@ -1741,7 +1784,14 @@ const BlockInsert = ({ tableData, setTableData }) => {
           }),
         })
           .then((res) => res.json())
-          .then((data) => {});
+          .then((data) => {
+            setProgressActual((prev) => prev + 1);
+            if (data.data.status === 200) {
+              setProgress((prev) => prev + 1);
+            } else {
+              errTotal.push(data.data.message);
+            }
+          });
       }
     }
 
@@ -1759,7 +1809,14 @@ const BlockInsert = ({ tableData, setTableData }) => {
           }),
         })
           .then((res) => res.json())
-          .then((data) => {});
+          .then((data) => {
+            setProgressActual((prev) => prev + 1);
+            if (data.data.status === 200) {
+              setProgress((prev) => prev + 1);
+            } else {
+              errTotal.push(data.data.message);
+            }
+          });
       }
     }
     //Fixed
@@ -1775,7 +1832,14 @@ const BlockInsert = ({ tableData, setTableData }) => {
         }),
       })
         .then((res) => res.json())
-        .then((data) => {});
+        .then((data) => {
+          setProgressActual((prev) => prev + 1);
+          if (data.data.status === 200) {
+            setProgress((prev) => prev + 1);
+          } else {
+            errTotal.push(data.data.message);
+          }
+        });
     }
 
     for (const fixed of fixedTopItem) {
@@ -1787,8 +1851,18 @@ const BlockInsert = ({ tableData, setTableData }) => {
         body: JSON.stringify({ bpName: "Turnover Packages", data: fixed }),
       })
         .then((res) => res.json())
-        .then((data) => {});
+        .then((data) => {
+          setProgressActual((prev) => prev + 1);
+          if (data.data.status === 200) {
+            setProgress((prev) => prev + 1);
+          } else {
+            errTotal.push(data.data.message);
+          }
+        });
     }
+
+    setErrorItem(errTotal);
+    setUpdateComplete(true);
   };
 
   const rePositioning = () => {
@@ -1818,10 +1892,23 @@ const BlockInsert = ({ tableData, setTableData }) => {
     diagram.model = go.Model.fromJson(JSON.stringify(rePositionData));
   };
 
-  const [visibleDialog, setVisibleDialog] = useState(true);
-
   const toggleDialog = () => {
     setVisibleDialog(!visibleDialog);
+  };
+
+  const [errorItem, setErrorItem] = useState([]);
+  console.log(errorItem);
+  console.log(progress);
+  console.log(progressTotal);
+
+  const [progressVisibleDialog, setProgressVisibleDialog] = useState(false);
+  const [updateComplete, setUpdateComplete] = useState(false);
+
+  const handleProgressVisibleDialog = () => {
+    setProgressVisibleDialog(false);
+    setProgressActual(0);
+    setProgress(0);
+    setProgressTotal(0);
   };
 
   return (
@@ -1899,6 +1986,79 @@ const BlockInsert = ({ tableData, setTableData }) => {
             </DialogActionsBar>
           </Dialog>
         )}
+        {progressVisibleDialog && (
+          <Dialog title={"Flow-Diagram Update"}>
+            <div className="updateProgressBox">
+              <ProgressBar
+                min={0}
+                max={100}
+                value={parseInt((progress / progressTotal) * 100)}
+              />
+              <div className="updateProgressResult">
+                처리결과:{" "}
+                {progressActual > 0 && progressActual / progressTotal === 1
+                  ? "업데이트를 완료하였습니다."
+                  : errorItem.length === 0
+                  ? "업데이트를 진행 중입니다."
+                  : "아래의 에러코드를 확인하여 주시기 바랍니다."}
+              </div>
+              <div className="updateProgressTableBox">
+                {errorItem.length > 0 && (
+                  <>
+                    <div className="updateProgressTable">
+                      <div
+                        className="updateProgressFirst"
+                        style={{ fontWeight: "bold" }}
+                      >
+                        No.
+                      </div>
+                      <div
+                        className="updateProgressSecond"
+                        style={{ fontWeight: "bold" }}
+                      >
+                        Activity_Name
+                      </div>
+                      <div
+                        className="updateProgressThrid"
+                        style={{ fontWeight: "bold" }}
+                      >
+                        Error_Code
+                      </div>
+                    </div>
+                    {errorItem.map((com, idx) => {
+                      return (
+                        <div className="updateProgressTable">
+                          <div className="updateProgressFirst">{idx + 1}</div>
+                          <div className="updateProgressSecond">
+                            {com.uuu_P6ActivityId !== undefined
+                              ? com.uuu_P6ActivityId
+                              : com.dtsTOPTitle !== undefined &&
+                                com.dtsTOPTitle}
+                          </div>
+                          <div className="updateProgressThrid">
+                            {com._record_status}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <DialogActionsBar>
+              <button
+                className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
+                onClick={handleProgressVisibleDialog}
+                disabled={
+                  !progressActual > 0 && progressActual / progressTotal === 1
+                }
+              >
+                완료
+              </button>
+            </DialogActionsBar>
+          </Dialog>
+        )}
       </div>
     </>
   );
@@ -1915,8 +2075,8 @@ const baseInsertComData = {
   ddd_evm_plan_finish: "",
   uuu_P6PlannedDuration: 0,
   actualDate: "Actual Date",
-  ddd_evm_actual_start: "",
-  ddd_evm_actual_finish: "",
+  ddd_evm_actual_start: " ",
+  ddd_evm_actual_finish: " ",
   uuu_P6ActualDuration: 0,
   record_no: "",
 };
