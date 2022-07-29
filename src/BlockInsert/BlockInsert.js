@@ -3,24 +3,15 @@ import { useParams } from "react-router-dom";
 import * as go from "gojs";
 import { ReactDiagram, ReactOverview } from "gojs-react";
 import moment from "moment";
-import {
-  Dialog,
-  DialogActionsBar,
-  Window,
-} from "@progress/kendo-react-dialogs";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import { ProgressBar } from "@progress/kendo-react-progressbars";
-
 import "./BlockInsert.scss";
 import ComCardInsert from "./ComCardInsert/ComCardInsert";
 import TopCardInsert from "./ComCardInsert/TopCardInsert";
 import axios from "axios";
-import ComModal from "./ComCardInsert/ComModal";
-import TopModal from "./ComCardInsert/TopModal";
-import InsertModal from "./TotalLayOut";
 import "./InsertModal.scss";
-import { compileFilter } from "@progress/kendo-data-query";
 
-const BlockInsert = ({ tableData, setTableData }) => {
+const BlockInsert = ({ setTableData }) => {
   const params = useParams();
   const [originalComBaseSet, setOriginalComBaseSet] = useState({});
   const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
@@ -40,6 +31,10 @@ const BlockInsert = ({ tableData, setTableData }) => {
   const [progressActual, setProgressActual] = useState(0);
   const [progress, setProgress] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
+
+  const [errorItem, setErrorItem] = useState([]);
+
+  const [progressVisibleDialog, setProgressVisibleDialog] = useState(false);
 
   const diagramRef = useRef();
 
@@ -1315,19 +1310,14 @@ const BlockInsert = ({ tableData, setTableData }) => {
         (com) => com.uuu_P6ActivityId === value.toUpperCase()
       );
 
-      console.log(checkItem);
       if (checkItem !== undefined) {
-        if (checkItem.status !== "Deleted") {
-          alert("이미 필드에 존재하는 Card입니다.");
-        } else {
-          setInsertData((prev) => {
-            return {
-              ...prev,
-              key: value.toUpperCase(),
-              record_no: checkItem.record_no,
-            };
-          });
-        }
+        setInsertData((prev) => {
+          return {
+            ...prev,
+            key: value.toUpperCase(),
+            record_no: checkItem.record_no,
+          };
+        });
       } else {
         setInsertData((prev) => {
           return {
@@ -1375,12 +1365,26 @@ const BlockInsert = ({ tableData, setTableData }) => {
         };
       });
     } else if (name === "key") {
-      setInsertTopData((prev) => {
-        return {
-          ...prev,
-          key: value.toUpperCase(),
-        };
-      });
+      const checkItem = comOriginalData.find(
+        (com) => com.uuu_P6ActivityId === value.toUpperCase()
+      );
+
+      if (checkItem !== undefined) {
+        setInsertTopData((prev) => {
+          return {
+            ...prev,
+            key: value.toUpperCase(),
+            record_no: checkItem.record_no,
+          };
+        });
+      } else {
+        setInsertTopData((prev) => {
+          return {
+            ...prev,
+            key: value.toUpperCase(),
+          };
+        });
+      }
     } else {
       setInsertTopData((prev) => {
         return {
@@ -1862,7 +1866,6 @@ const BlockInsert = ({ tableData, setTableData }) => {
     }
 
     setErrorItem(errTotal);
-    setUpdateComplete(true);
   };
 
   const rePositioning = () => {
@@ -1895,14 +1898,6 @@ const BlockInsert = ({ tableData, setTableData }) => {
   const toggleDialog = () => {
     setVisibleDialog(!visibleDialog);
   };
-
-  const [errorItem, setErrorItem] = useState([]);
-  console.log(errorItem);
-  console.log(progress);
-  console.log(progressTotal);
-
-  const [progressVisibleDialog, setProgressVisibleDialog] = useState(false);
-  const [updateComplete, setUpdateComplete] = useState(false);
 
   const handleProgressVisibleDialog = () => {
     setProgressVisibleDialog(false);
@@ -1955,12 +1950,14 @@ const BlockInsert = ({ tableData, setTableData }) => {
                   insertData={insertData}
                   setInsertData={setInsertData}
                   handleInsertData={handleInsertData}
+                  comOriginalData={comOriginalData}
                 />
               ) : (
                 <TopCardInsert
                   insertTopData={insertTopData}
                   setInsertTopData={setInsertTopData}
                   handleInsertTopData={handleInsertTopData}
+                  comOriginalData={comOriginalData}
                 />
               )}
             </div>
@@ -2075,8 +2072,8 @@ const baseInsertComData = {
   ddd_evm_plan_finish: "",
   uuu_P6PlannedDuration: 0,
   actualDate: "Actual Date",
-  ddd_evm_actual_start: " ",
-  ddd_evm_actual_finish: " ",
+  ddd_evm_actual_start: "",
+  ddd_evm_actual_finish: "",
   uuu_P6ActualDuration: 0,
   record_no: "",
 };

@@ -1,11 +1,13 @@
 import React from "react";
 import moment from "moment";
 import { DatePicker } from "@progress/kendo-react-dateinputs";
+import { Input } from "@progress/kendo-react-inputs";
 
 const TopCardInsert = ({
   insertTopData,
   handleInsertTopData,
   setInsertTopData,
+  comOriginalData,
 }) => {
   const handleDateFicker = ({ value }, name) => {
     if (name === "uuu_P6ActivityName") {
@@ -29,6 +31,24 @@ const TopCardInsert = ({
           [name]: moment(new Date(value)).format("MM-DD-YYYY"),
         };
       });
+    }
+  };
+
+  const handleCheck = (e) => {
+    const checkItem = comOriginalData.find(
+      (com) => com.uuu_P6ActivityId === e.target.value.toUpperCase()
+    );
+
+    if (checkItem !== undefined) {
+      if (checkItem.status !== "Deleted") {
+        alert("이미 필드에 존재하는 Card입니다.");
+        setInsertTopData((prev) => {
+          return {
+            ...prev,
+            key: "",
+          };
+        });
+      }
     }
   };
 
@@ -61,23 +81,35 @@ const TopCardInsert = ({
       <div className="blockDataInsertBox">
         <div className="blockDataInsert">
           <div>Card Key: </div>
-          <input
+          <Input
+            name="key"
+            onChange={handleInsertTopData}
+            value={insertTopData.key}
+            onBlur={handleCheck}
+          />
+          {/* <input
             type="text"
             className="blockDataInsertTitle"
             name="key"
             onChange={handleInsertTopData}
             value={insertTopData.key}
-          />
+          /> */}
         </div>
         <div className="blockDataInsert">
           <div>Card Title: </div>
-          <input
+          <Input
+            type="text"
+            name="uuu_P6ActivityName"
+            onChange={handleInsertTopData}
+            value={insertTopData.uuu_P6ActivityName}
+          />
+          {/* <input
             type="text"
             className="blockDataInsertTitle"
             name="uuu_P6ActivityName"
             onChange={handleInsertTopData}
             value={insertTopData.uuu_P6ActivityName}
-          />
+          /> */}
         </div>
         <div className="blockDataInsert">
           <div>Plan Date Start: </div>

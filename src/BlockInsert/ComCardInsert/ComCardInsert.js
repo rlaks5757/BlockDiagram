@@ -3,7 +3,12 @@ import moment from "moment";
 import { DatePicker } from "@progress/kendo-react-dateinputs";
 import { Input } from "@progress/kendo-react-inputs";
 
-const ComCardInsert = ({ insertData, setInsertData, handleInsertData }) => {
+const ComCardInsert = ({
+  insertData,
+  setInsertData,
+  handleInsertData,
+  comOriginalData,
+}) => {
   const handleDateFicker = ({ value }, name) => {
     if (name === "ddd_evm_plan_finish") {
       if (insertData.ddd_evm_plan_start.length > 0) {
@@ -44,6 +49,24 @@ const ComCardInsert = ({ insertData, setInsertData, handleInsertData }) => {
           [name]: moment(new Date(value)).format("MM-DD-YYYY"),
         };
       });
+    }
+  };
+
+  const handleCheck = (e) => {
+    const checkItem = comOriginalData.find(
+      (com) => com.uuu_P6ActivityId === e.target.value.toUpperCase()
+    );
+
+    if (checkItem !== undefined) {
+      if (checkItem.status !== "Deleted") {
+        alert("이미 필드에 존재하는 Card입니다.");
+        setInsertData((prev) => {
+          return {
+            ...prev,
+            key: "",
+          };
+        });
+      }
     }
   };
 
@@ -121,6 +144,7 @@ const ComCardInsert = ({ insertData, setInsertData, handleInsertData }) => {
               handleInsertData(e);
             }}
             value={insertData.key}
+            onBlur={handleCheck}
           />
         </div>
 

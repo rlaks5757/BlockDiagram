@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
-import ComCardInsert from "../ComCardInsert/ComCardInsert";
-import TopCardInsert from "../ComCardInsert/TopCardInsert";
+import ComCardInsert from "../../BlockInsert/ComCardInsert/ComCardInsert";
+import TopCardInsert from "../../BlockInsert/ComCardInsert/TopCardInsert";
 import "./InsertBlockControl.scss";
 
 const InsertBlockControl = ({

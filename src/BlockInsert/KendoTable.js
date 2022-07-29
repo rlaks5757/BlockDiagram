@@ -3,13 +3,13 @@ import moment from "moment";
 import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import { process } from "@progress/kendo-data-query";
 
-import {
-  IntlProvider,
-  load,
-  LocalizationProvider,
-  loadMessages,
-  IntlService,
-} from "@progress/kendo-react-intl";
+// import {
+//   IntlProvider,
+//   load,
+//   LocalizationProvider,
+//   loadMessages,
+//   IntlService,
+// } from "@progress/kendo-react-intl";
 
 // import likelySubtags from "cldr-core/supplemental/likelySubtags.json";
 // import currencyData from "cldr-core/supplemental/currencyData.json";
@@ -29,8 +29,6 @@ import {
 //   dateFields,
 //   timeZoneNames
 // );
-
-import InsertBlockControl from "./InsertBlockControl/InsertBlockControl";
 
 const KendoTable = ({ customTableData }) => {
   const [dataState, setDataState] = React.useState({
@@ -136,7 +134,7 @@ export default KendoTable;
 
 const DetailComponent = (props) => {
   const dataItem = props.dataItem;
-  console.log(dataItem);
+
   return (
     <div>
       <section
@@ -157,7 +155,9 @@ const DetailComponent = (props) => {
         </p>
         <p>
           <strong>Plan_Finish_Date:</strong>{" "}
-          {dataItem.Plan_Finish_Date !== ""
+          {dataItem.Plan_Finish_Date !== undefined
+            ? ""
+            : dataItem.Plan_Finish_Date !== ""
             ? moment(new Date(dataItem.Plan_Finish_Date)).format("MM-DD-YYYY")
             : ""}
         </p>
@@ -172,7 +172,9 @@ const DetailComponent = (props) => {
         </p>
         <p>
           <strong>Actual_Finish_Date:</strong>{" "}
-          {dataItem.Actual_Finish_Date !== ""
+          {dataItem.Plan_Finish_Date !== undefined
+            ? " "
+            : dataItem.Actual_Finish_Date !== ""
             ? moment(new Date(dataItem.Actual_Finish_Date)).format("MM-DD-YYYY")
             : ""}
         </p>
