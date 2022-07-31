@@ -1120,7 +1120,7 @@ const BlockInsert = ({ setTableData }) => {
       const fetchData = await axios.get(
         `http://localhost:8000/blockInfo/${params.id}`
       );
-
+      console.log(fetchData);
       setTableData(fetchData.data);
 
       const comData = await fetchData.data.com;
@@ -1199,6 +1199,9 @@ const BlockInsert = ({ setTableData }) => {
                 baseSet.linkDataArray.push({
                   from: com.uuu_P6ActivityId,
                   to: com2.dtsCommActivityBPK,
+                  points: com2.dtsDashCoordinates
+                    .split(",")
+                    .map((com) => Number(com)),
                   dtsLineAutoSeq: com2.dtsLineAutoSeq,
                 });
               });
@@ -1255,6 +1258,9 @@ const BlockInsert = ({ setTableData }) => {
               baseSet.linkDataArray.push({
                 from: com.dtsTOPCode,
                 to: com2.uuu_P6ActivityId,
+                points: com2.dtsDashCoordinates
+                  .split(",")
+                  .map((com) => Number(com)),
                 dtsLineAutoSeq: com2.dtsLineAutoSeq,
               });
             });
@@ -1422,6 +1428,8 @@ const BlockInsert = ({ setTableData }) => {
 
     let comData = [];
     let topData = [];
+
+    console.log(insertNodeData);
 
     await insertNodeData.nodeDataArray.forEach((com) => {
       if (com.category === "Top") {
