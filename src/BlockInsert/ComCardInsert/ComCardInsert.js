@@ -1,33 +1,85 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import moment from "moment";
+import { DatePicker } from "@progress/kendo-react-dateinputs";
+import { Input } from "@progress/kendo-react-inputs";
 
-const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
-  const keyRef = useRef();
+const ComCardInsert = ({
+  insertData,
+  setInsertData,
+  handleInsertData,
+  comOriginalData,
+}) => {
+  const handleDateFicker = ({ value }, name) => {
+    if (name === "ddd_evm_plan_finish") {
+      if (insertData.ddd_evm_plan_start.length > 0) {
+        setInsertData((prev) => {
+          return {
+            ...prev,
+            [name]: moment(new Date(value)).format("MM-DD-YYYY"),
+            uuu_P6PlannedDuration:
+              moment(new Date(value)).diff(
+                moment(new Date(prev.ddd_evm_plan_start)),
+                "days"
+              ) + 1,
+          };
+        });
+      } else {
+        alert("Plan Date 시작일을 지정하여 주시기 바랍니다.");
+      }
+    } else if (name === "ddd_evm_plan_finish") {
+      if (insertData.ddd_evm_actual_start.length > 0) {
+        setInsertData((prev) => {
+          return {
+            ...prev,
+            [name]: moment(new Date(value)).format("MM-DD-YYYY"),
+            uuu_P6ActualDuration:
+              moment(new Date(value)).diff(
+                moment(new Date(prev.ddd_evm_actual_start)),
+                "days"
+              ) + 1,
+          };
+        });
+      } else {
+        alert("Acutall Date 시작일을 지정하여 주시기 바랍니다.");
+      }
+    } else {
+      setInsertData((prev) => {
+        return {
+          ...prev,
+          [name]: moment(new Date(value)).format("MM-DD-YYYY"),
+        };
+      });
+    }
+  };
 
-  const checkCardKey = (e) => {
-    const diagram = diagramRef.current?.getDiagram();
+  const handleCheck = (e) => {
+    const checkItem = comOriginalData.find(
+      (com) => com.uuu_P6ActivityId === e.target.value.toUpperCase()
+    );
 
-    const nodeDataArray = JSON.parse(diagram.model.toJson()).nodeDataArray;
-
-    const checkKeyValue = nodeDataArray.some((com) => {
-      return com.key === e.target.value;
-    });
-
-    if (checkKeyValue) {
-      alert("중복된 Card Key값이 있습니다.");
-      keyRef.current.focus();
-      keyRef.current.value = "";
+    if (checkItem !== undefined) {
+      if (checkItem.status !== "Deleted") {
+        alert("이미 필드에 존재하는 Card입니다.");
+        setInsertData((prev) => {
+          return {
+            ...prev,
+            key: "",
+          };
+        });
+      }
     }
   };
 
   return (
-    <>
-      <div className="blockSampleCom">
-        <div className="blockSampleTitle">{insertData.uuu_P6ActivityName}</div>
-        <div className="blockSampleDate">{insertData.planDate}</div>
-        <div className="blockSampleDateBox">
+    <div className="blockInsertModalInsertBox">
+      <div className="blockInsertModalSample">
+        <div className="blockInsertModalSampleTitle">
+          {insertData.uuu_P6ActivityName}
+        </div>
+        <div className="blockInsertModalSampleDate">{insertData.planDate}</div>
+        <div className="blockInsertModalSampleDateBox">
           <div
-            className="blockSampleDateBoxDate"
+            className="blockInsertModalSampleBoxDate"
             style={{
               backgroundColor:
                 insertData.category === "High"
@@ -38,24 +90,26 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
             }}
           >
             <div>
-              {insertData.ddd_evm_plan_start.length > 0
+              {insertData.ddd_evm_plan_start !== ""
                 ? insertData.ddd_evm_plan_start
                 : ""}
             </div>
             <div>
-              {insertData.ddd_evm_plan_finish.length > 0
+              {insertData.ddd_evm_plan_finish !== ""
                 ? insertData.ddd_evm_plan_finish
                 : ""}
             </div>
           </div>
-          <div className="blockSampleDateBoxDuration">
+          <div className="blockInsertModalSampleDateBoxDuration">
             {insertData.uuu_P6PlannedDuration}
           </div>
         </div>
-        <div className="blockSampleDate">{insertData.actualDate}</div>
-        <div className="blockSampleDateBox">
+        <div className="blockInsertModalSampleDate">
+          {insertData.actualDate}
+        </div>
+        <div className="blockInsertModalSampleDateBox">
           <div
-            className="blockSampleDateBoxDate actual"
+            className="blockInsertModalSampleBoxDate"
             style={{
               backgroundColor:
                 insertData.category === "High"
@@ -76,7 +130,7 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
                 : null}
             </div>
           </div>
-          <div className="blockSampleDateBoxDuration">
+          <div className="blockInsertModalSampleDateBoxDuration">
             {insertData.uuu_P6ActualDuration}
           </div>
         </div>
@@ -84,21 +138,20 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
       <div className="blockDataInsertBox">
         <div className="blockDataInsert">
           <div>Card Key: </div>
-          <input
-            type="text"
-            className="blockDataInsertTitle"
+          <Input
             name="key"
-            onChange={handleInsertData}
+            onChange={(e) => {
+              handleInsertData(e);
+            }}
             value={insertData.key}
-            onBlur={checkCardKey}
-            ref={keyRef}
+            onBlur={handleCheck}
           />
         </div>
+
         <div className="blockDataInsert">
           <div>Card Title: </div>
-          <input
+          <Input
             type="text"
-            className="blockDataInsertTitle"
             name="uuu_P6ActivityName"
             onChange={handleInsertData}
             value={insertData.uuu_P6ActivityName}
@@ -106,66 +159,50 @@ const ComCardInsert = ({ insertData, handleInsertData, diagramRef }) => {
         </div>
         <div className="blockDataInsert">
           <div>Plan Date Start: </div>
-          <input
-            type="date"
-            name="ddd_evm_plan_start"
-            onChange={handleInsertData}
+          <DatePicker
             value={
               insertData.ddd_evm_plan_start.length > 0
-                ? moment(new Date(insertData.ddd_evm_plan_start)).format(
-                    "YYYY-MM-DD"
-                  )
+                ? new Date(insertData.ddd_evm_plan_start)
                 : ""
             }
+            onChange={(e) => handleDateFicker(e, "ddd_evm_plan_start")}
           />
         </div>
         <div className="blockDataInsert">
           <div>Plan Date Finish: </div>
-          <input
-            type="date"
-            name="ddd_evm_plan_finish"
-            onChange={handleInsertData}
+          <DatePicker
             value={
               insertData.ddd_evm_plan_finish.length > 0
-                ? moment(new Date(insertData.ddd_evm_plan_finish)).format(
-                    "YYYY-MM-DD"
-                  )
+                ? new Date(insertData.ddd_evm_plan_finish)
                 : ""
             }
+            onChange={(e) => handleDateFicker(e, "ddd_evm_plan_finish")}
           />
         </div>
         <div className="blockDataInsert">
           <div>Actual Date Start: </div>
-          <input
-            type="date"
-            name="ddd_evm_actual_start"
-            onChange={handleInsertData}
+          <DatePicker
             value={
               insertData.ddd_evm_actual_start.length > 0
-                ? moment(new Date(insertData.ddd_evm_actual_start)).format(
-                    "YYYY-MM-DD"
-                  )
+                ? new Date(insertData.ddd_evm_actual_start)
                 : ""
             }
+            onChange={(e) => handleDateFicker(e, "ddd_evm_actual_start")}
           />
         </div>
         <div className="blockDataInsert">
           <div>Actual Date Finish: </div>
-          <input
-            type="date"
-            name="ddd_evm_actual_finish"
-            onChange={handleInsertData}
+          <DatePicker
             value={
               insertData.ddd_evm_actual_finish.length > 0
-                ? moment(new Date(insertData.ddd_evm_actual_finish)).format(
-                    "YYYY-MM-DD"
-                  )
+                ? new Date(insertData.ddd_evm_actual_finish)
                 : ""
             }
+            onChange={(e) => handleDateFicker(e, "ddd_evm_actual_finish")}
           />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

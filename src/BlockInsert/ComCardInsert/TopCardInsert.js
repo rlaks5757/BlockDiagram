@@ -1,104 +1,136 @@
-import React, { useRef } from "react";
+import React from "react";
 import moment from "moment";
+import { DatePicker } from "@progress/kendo-react-dateinputs";
+import { Input } from "@progress/kendo-react-inputs";
 
-const TopCardInsert = ({ insertTopData, handleInsertTopData, diagramRef }) => {
-  const keyRef = useRef();
+const TopCardInsert = ({
+  insertTopData,
+  handleInsertTopData,
+  setInsertTopData,
+  comOriginalData,
+}) => {
+  const handleDateFicker = ({ value }, name) => {
+    if (name === "uuu_P6ActivityName") {
+      setInsertTopData((prev) => {
+        return {
+          ...prev,
+          [name]: value,
+        };
+      });
+    } else if (name === "key") {
+      setInsertTopData((prev) => {
+        return {
+          ...prev,
+          key: value.toUpperCase(),
+        };
+      });
+    } else {
+      setInsertTopData((prev) => {
+        return {
+          ...prev,
+          [name]: moment(new Date(value)).format("MM-DD-YYYY"),
+        };
+      });
+    }
+  };
 
-  const checkCardKey = (e) => {
-    const diagram = diagramRef.current?.getDiagram();
+  const handleCheck = (e) => {
+    const checkItem = comOriginalData.find(
+      (com) => com.uuu_P6ActivityId === e.target.value.toUpperCase()
+    );
 
-    const nodeDataArray = JSON.parse(diagram.model.toJson()).nodeDataArray;
-
-    const checkKeyValue = nodeDataArray.some((com) => {
-      return com.key === e.target.value;
-    });
-
-    if (checkKeyValue) {
-      alert("중복된 Card Key값이 있습니다.");
-      keyRef.current.focus();
-      keyRef.current.value = "";
+    if (checkItem !== undefined) {
+      if (checkItem.status !== "Deleted") {
+        alert("이미 필드에 존재하는 Card입니다.");
+        setInsertTopData((prev) => {
+          return {
+            ...prev,
+            key: "",
+          };
+        });
+      }
     }
   };
 
   return (
     <>
-      <div className="blockSampleCom">
-        <div className="blockSampleKey">{insertTopData.key}</div>
-        <div className="blockSampleTitle">
-          {insertTopData.uuu_P6ActivityName}
-        </div>
-        <div className="blockSampleDate">{insertTopData.planDate}</div>
-        <div className="blockSampleDateBox">
-          <div className="blockSampleDateBoxDateTop">
-            <div>
-              {insertTopData.ddd_evm_plan_start.length > 0
-                ? insertTopData.ddd_evm_plan_start
-                : ""}
-            </div>
+      <div className="blockInsertModalInsertBox">
+        <div className="blockInsertModalSample">
+          <div className="lockInsertModalSampleKey">{insertTopData.key}</div>
+          <div className="blockInsertModalSampleTitle">
+            {insertTopData.uuu_P6ActivityName}
           </div>
-        </div>
-        <div className="blockSampleDate">{insertTopData.actualDate}</div>
-        <div className="blockSampleDateBox">
-          <div className="blockSampleDateBoxDateTop">
-            <div>
-              {insertTopData.ddd_evm_actual_start.length > 0
-                ? insertTopData.ddd_evm_actual_start
-                : ""}
-            </div>
+          <div className="blockInsertModalSampleDate">
+            {insertTopData.planDate}
+          </div>
+          <div className="blockInsertModalSampleDateTop">
+            {insertTopData.ddd_evm_plan_start.length > 0
+              ? insertTopData.ddd_evm_plan_start
+              : ""}
+          </div>
+          <div className="blockInsertModalSampleDate">
+            {insertTopData.actualDate}
+          </div>
+          <div className="blockInsertModalSampleDateTop">
+            {insertTopData.ddd_evm_actual_start.length > 0
+              ? insertTopData.ddd_evm_actual_start
+              : ""}
           </div>
         </div>
       </div>
       <div className="blockDataInsertBox">
         <div className="blockDataInsert">
           <div>Card Key: </div>
-          <input
+          <Input
+            name="key"
+            onChange={handleInsertTopData}
+            value={insertTopData.key}
+            onBlur={handleCheck}
+          />
+          {/* <input
             type="text"
             className="blockDataInsertTitle"
             name="key"
             onChange={handleInsertTopData}
             value={insertTopData.key}
-            onBlur={checkCardKey}
-            ref={keyRef}
-          />
+          /> */}
         </div>
         <div className="blockDataInsert">
           <div>Card Title: </div>
-          <input
+          <Input
+            type="text"
+            name="uuu_P6ActivityName"
+            onChange={handleInsertTopData}
+            value={insertTopData.uuu_P6ActivityName}
+          />
+          {/* <input
             type="text"
             className="blockDataInsertTitle"
             name="uuu_P6ActivityName"
             onChange={handleInsertTopData}
             value={insertTopData.uuu_P6ActivityName}
-          />
+          /> */}
         </div>
         <div className="blockDataInsert">
           <div>Plan Date Start: </div>
-          <input
-            type="date"
-            name="ddd_evm_plan_start"
-            onChange={handleInsertTopData}
+          <DatePicker
             value={
               insertTopData.ddd_evm_plan_start.length > 0
-                ? moment(new Date(insertTopData.ddd_evm_plan_start)).format(
-                    "YYYY-MM-DD"
-                  )
+                ? new Date(insertTopData.ddd_evm_plan_start)
                 : ""
             }
+            onChange={(e) => handleDateFicker(e, "ddd_evm_plan_start")}
           />
         </div>
         <div className="blockDataInsert">
           <div>Actual Date Start: </div>
-          <input
-            type="date"
-            name="ddd_evm_actual_start"
-            onChange={handleInsertTopData}
+          <DatePicker
             value={
               insertTopData.ddd_evm_actual_start.length > 0
-                ? moment(new Date(insertTopData.ddd_evm_actual_start)).format(
-                    "YYYY-MM-DD"
-                  )
+                ? new Date(insertTopData.ddd_evm_actual_start)
                 : ""
             }
+            onChange={(e) => handleDateFicker(e, "ddd_evm_actual_start")}
           />
         </div>
       </div>

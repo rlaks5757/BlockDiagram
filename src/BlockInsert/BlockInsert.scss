@@ -6,7 +6,7 @@
   height: 700px;
 
   .diagram-component {
-    // width: 80%;
+    width: 100%;
     height: 100%;
     flex-grow: 1;
     border: 1px solid black;
@@ -15,7 +15,7 @@
   .overview-component {
     z-index: 99;
     position: absolute;
-    right: 300px;
+    right: 0;
     top: 0;
     width: 150px;
     height: 100px;
@@ -23,120 +23,80 @@
     border: 1px solid black;
   }
 
-  .blockInsertBox {
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .controlButtonBox {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 10px 5px;
+    z-index: 100;
 
-    .blockInsertBoxTitle {
-      margin-bottom: 10px;
+    button {
+      padding: 5px 10px;
     }
-    select {
-      text-align: center;
-      width: 80%;
-    }
+  }
+}
 
-    .blockSampleCom {
-      margin-top: 20px;
-      border: 2px solid black;
-      border-radius: 5px;
-      width: 125px;
+.blockInsert.close {
+  display: none;
+}
 
-      div {
-        font-size: 10px;
-        font-family: helvetica, arial, sans-serif;
-      }
+button {
+  margin-right: 10px;
+}
 
-      .blockSampleKey {
+.updateProgressBox {
+  .updateProgressResult {
+    margin-top: 10px;
+  }
+
+  .updateProgressTableBox {
+    .updateProgressTable {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+
+      .updateProgressFirst {
         display: flex;
-        align-items: center;
         justify-content: center;
-        height: 25px;
+        align-items: center;
+        width: 10%;
+        padding: 5px 0;
       }
 
-      .blockSampleTitle {
+      .updateProgressSecond {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         text-align: center;
-        margin: 0 10px;
+        width: 45%;
+        padding: 5px 0;
+      }
+
+      .updateProgressThrid {
         display: flex;
-        align-items: center;
         justify-content: center;
-        height: 75px;
-        word-break: break-all;
-      }
-
-      .blockSampleDate {
-        display: flex;
         align-items: center;
-        justify-content: center;
-        border-top: 1px solid black;
-        border-bottom: 1px solid black;
-        height: 25px;
-      }
-
-      .blockSampleDateBox {
-        display: flex;
-
-        .blockSampleDateBoxDate {
-          width: 90px;
-          border-right: 1px solid black;
-
-          div {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 25px;
-          }
-        }
-        .blockSampleDateBoxDuration {
-          width: 35px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .blockSampleDateBoxDate.actual {
-          border-radius: 0 0 0 10px;
-        }
-
-        .blockSampleDateBoxDateTop {
-          width: 125px;
-
-          div {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 25px;
-          }
-        }
-      }
-    }
-
-    .blockDataInsertBox {
-      margin-top: 20px;
-      width: 280px;
-
-      .blockDataInsert {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        margin-bottom: 10px;
-
-        .blockDataInsertTitle {
-          width: 100%;
-        }
+        width: 45%;
+        padding: 5px 0;
       }
     }
   }
 }
 
-.buttonBox9 {
-  z-index: 99;
-  position: absolute;
-  left: 5px;
-  bottom: -50px;
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
-button {
-  margin-right: 10px;
+@keyframes fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
