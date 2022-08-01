@@ -1311,26 +1311,35 @@ const BlockInsert = ({ setTableData }) => {
         };
       });
     } else if (name === "key") {
-      const checkItem = comOriginalData.find(
-        (com) => com.uuu_P6ActivityId === value.toUpperCase()
-      );
+      // const checkItem = comOriginalData.find(
+      //   (com) => com.uuu_P6ActivityId === value.toUpperCase()
+      // );
+      // console.log(value.toUpperCase());
+      // console.log(checkItem);
 
-      if (checkItem !== undefined) {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-            record_no: checkItem.record_no,
-          };
-        });
-      } else {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-          };
-        });
-      }
+      // if (checkItem !== undefined) {
+      //   setInsertData((prev) => {
+      //     return {
+      //       ...prev,
+      //       key: value.toUpperCase(),
+      //       record_no: checkItem.record_no,
+      //     };
+      //   });
+      // } else {
+      //   setInsertData((prev) => {
+      //     return {
+      //       ...prev,
+      //       key: value.toUpperCase(),
+      //     };
+      //   });
+      // }
+
+      setInsertData((prev) => {
+        return {
+          ...prev,
+          key: value.toUpperCase(),
+        };
+      });
     } else if (name === "category") {
       if (value === "Turn-Over Package") {
         setInsertDataToogle(false);
@@ -1401,7 +1410,11 @@ const BlockInsert = ({ setTableData }) => {
   };
 
   const InsertBlockData = () => {
-    console.log(insertData);
+    const checkItem = comOriginalData.find(
+      (com) => com.uuu_P6ActivityId === insertData.key
+    );
+
+    insertData.record_no = checkItem.record_no;
 
     const diagram = diagramRef.current?.getDiagram();
 
@@ -1427,8 +1440,6 @@ const BlockInsert = ({ setTableData }) => {
 
     let comData = [];
     let topData = [];
-
-    console.log(insertNodeData);
 
     await insertNodeData.nodeDataArray.forEach((com) => {
       if (com.category === "Top") {
@@ -1532,7 +1543,7 @@ const BlockInsert = ({ setTableData }) => {
                   return com3.key === com2.to;
                 }
               )[0]["uuu_P6ActivityName"],
-              dtsLineAutoSeq: "99999",
+              dtsLineAutoSeq: String(Math.round(Math.random() * 1000000000000)),
               short_desc: "1",
             });
           }
@@ -1555,7 +1566,7 @@ const BlockInsert = ({ setTableData }) => {
             com._bp_lineitems.push({
               dtsCommActivityBPK: com2.to,
               dtsDashCoordinates: com2.points.join(),
-              dtsLineAutoSeq: "99999",
+              dtsLineAutoSeq: String(Math.round(Math.random() * 1000000000000)),
               uuu_tab_id: "Relationship",
               short_desc: "1",
             });
@@ -1905,10 +1916,17 @@ const BlockInsert = ({ setTableData }) => {
   };
 
   const handleProgressVisibleDialog = () => {
-    setProgressVisibleDialog(false);
-    setProgressActual(0);
-    setProgress(0);
-    setProgressTotal(0);
+    if (progressActual === 0) {
+      alert("업데이트가 진행 중입니다.");
+    } else if (progressActual === progressTotal) {
+      setProgressVisibleDialog(false);
+      setProgressActual(0);
+      setProgress(0);
+      setProgressTotal(0);
+      commissionFetch();
+    } else {
+      alert("업데이트가 진행 중입니다.");
+    }
   };
 
   return (
@@ -1994,7 +2012,7 @@ const BlockInsert = ({ setTableData }) => {
               <ProgressBar
                 min={0}
                 max={100}
-                value={parseInt((progress / progressTotal) * 100)}
+                value={parseInt((progressActual / progressTotal) * 100)}
               />
               <div className="updateProgressResult">
                 처리결과:{" "}

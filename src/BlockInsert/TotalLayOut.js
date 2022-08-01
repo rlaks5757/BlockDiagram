@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { TabStrip, TabStripTab } from "@progress/kendo-react-layout";
 import KendoTable from "./KendoTable";
 import BlockInsert from "./BlockInsert";
+import BlockView from "../BlockView/BlockView";
 import "./TotalLayOut.scss";
 
 const TotalLayOut = () => {
@@ -99,7 +100,10 @@ const TotalLayOut = () => {
   return (
     <TabStrip selected={selected} onSelect={handleSelect}>
       <TabStripTab title="Flow-Diagram">
-        <BlockInsert tableData={tableData} setTableData={setTableData} />
+        <BlockView />
+      </TabStripTab>
+      <TabStripTab title="Flow-Diagram Insert">
+        <BlockInsert setTableData={setTableData} />
       </TabStripTab>
       <TabStripTab title="Flow-Diagram Data">
         <KendoTable customTableData={customTableData} />

@@ -144,7 +144,7 @@ const ComCardInsert = ({
               handleInsertData(e);
             }}
             value={insertData.key}
-            onBlur={handleCheck}
+            // onBlur={handleCheck}
           />
         </div>
 
