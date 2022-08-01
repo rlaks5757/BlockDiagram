@@ -1119,7 +1119,7 @@ const BlockInsert = ({ setTableData }) => {
       const diagram = await diagramRef.current?.getDiagram();
 
       const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
-      console.log(fetchData);
+
       setTableData(fetchData.data);
 
       const comData = await fetchData.data.com;
@@ -1379,26 +1379,32 @@ const BlockInsert = ({ setTableData }) => {
         };
       });
     } else if (name === "key") {
-      const checkItem = comOriginalData.find(
-        (com) => com.uuu_P6ActivityId === value.toUpperCase()
-      );
+      // const checkItem = comOriginalData.find(
+      //   (com) => com.uuu_P6ActivityId === value.toUpperCase()
+      // );
 
-      if (checkItem !== undefined) {
-        setInsertTopData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-            record_no: checkItem.record_no,
-          };
-        });
-      } else {
-        setInsertTopData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-          };
-        });
-      }
+      // if (checkItem !== undefined) {
+      //   setInsertTopData((prev) => {
+      //     return {
+      //       ...prev,
+      //       key: value.toUpperCase(),
+      //       record_no: checkItem.record_no,
+      //     };
+      //   });
+      // } else {
+      //   setInsertTopData((prev) => {
+      //     return {
+      //       ...prev,
+      //       key: value.toUpperCase(),
+      //     };
+      //   });
+      // }
+      setInsertTopData((prev) => {
+        return {
+          ...prev,
+          key: value.toUpperCase(),
+        };
+      });
     } else {
       setInsertTopData((prev) => {
         return {
@@ -1414,7 +1420,9 @@ const BlockInsert = ({ setTableData }) => {
       (com) => com.uuu_P6ActivityId === insertData.key
     );
 
-    insertData.record_no = checkItem.record_no;
+    if (checkItem !== undefined) {
+      insertData.record_no = checkItem.record_no;
+    }
 
     const diagram = diagramRef.current?.getDiagram();
 

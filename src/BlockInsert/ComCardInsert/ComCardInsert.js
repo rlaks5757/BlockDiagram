@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
 import moment from "moment";
 import { DatePicker } from "@progress/kendo-react-dateinputs";
 import { Input } from "@progress/kendo-react-inputs";
@@ -144,7 +144,7 @@ const ComCardInsert = ({
               handleInsertData(e);
             }}
             value={insertData.key}
-            // onBlur={handleCheck}
+            onBlur={handleCheck}
           />
         </div>
 
