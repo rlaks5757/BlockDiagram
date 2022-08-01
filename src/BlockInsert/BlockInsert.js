@@ -9,6 +9,7 @@ import "./BlockInsert.scss";
 import ComCardInsert from "./ComCardInsert/ComCardInsert";
 import TopCardInsert from "./ComCardInsert/TopCardInsert";
 import axios from "axios";
+import Url from "../url/fetchURL";
 import "./InsertModal.scss";
 
 const BlockInsert = ({ setTableData }) => {
@@ -1117,9 +1118,7 @@ const BlockInsert = ({ setTableData }) => {
 
       const diagram = await diagramRef.current?.getDiagram();
 
-      const fetchData = await axios.get(
-        `http://localhost:8000/blockInfo/${params.id}`
-      );
+      const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
       console.log(fetchData);
       setTableData(fetchData.data);
 
@@ -1588,9 +1587,7 @@ const BlockInsert = ({ setTableData }) => {
     const finalComData = await comData.concat(comDeleteitemChange);
     const finalTopData = await topData.concat(topDeleteitemChange);
 
-    const fetchData = await axios.get(
-      `http://localhost:8000/blockInfo/${params.id}`
-    );
+    const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
 
     const lastestComFetchData = await fetchData.data.com;
     const lastestTopFetchData = await fetchData.data.top;
@@ -1741,7 +1738,7 @@ const BlockInsert = ({ setTableData }) => {
     //oracle request
     //Input
     for (const inputItem of newComItem) {
-      fetch(`http://localhost:8000/blockInfo/new/${params.id}`, {
+      fetch(`${Url}/blockInfo/new/${params.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1763,7 +1760,7 @@ const BlockInsert = ({ setTableData }) => {
     }
 
     for (const inputItem of newTopItem) {
-      fetch(`http://localhost:8000/blockInfo/new/${params.id}`, {
+      fetch(`${Url}/blockInfo/new/${params.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1784,7 +1781,7 @@ const BlockInsert = ({ setTableData }) => {
     //Delete
     for (const deleteItem of deleteComFinal) {
       if (deleteItem._bp_lineitems.length > 0) {
-        fetch(`http://localhost:8000/blockInfo/delete/${params.id}`, {
+        fetch(`${Url}/blockInfo/delete/${params.id}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1809,7 +1806,7 @@ const BlockInsert = ({ setTableData }) => {
 
     for (const deleteItem of deleteTopFinal) {
       if (deleteItem._bp_lineitems.length > 0) {
-        fetch(`http://localhost:8000/blockInfo/delete/${params.id}`, {
+        fetch(`${Url}/blockInfo/delete/${params.id}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1833,7 +1830,7 @@ const BlockInsert = ({ setTableData }) => {
     }
     //Fixed
     for (const fixed of fixedComItem) {
-      fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
+      fetch(`${Url}/blockInfo/fixed/${params.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1855,7 +1852,7 @@ const BlockInsert = ({ setTableData }) => {
     }
 
     for (const fixed of fixedTopItem) {
-      fetch(`http://localhost:8000/blockInfo/fixed/${params.id}`, {
+      fetch(`${Url}/blockInfo/fixed/${params.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
