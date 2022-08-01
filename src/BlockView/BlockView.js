@@ -5,7 +5,6 @@ import { ReactDiagram, ReactOverview } from "gojs-react";
 import moment from "moment";
 import Url from "../url/fetchURL";
 import "./BlockView.scss";
-import _ from "lodash";
 
 import axios from "axios";
 
@@ -237,7 +236,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 0,
               column: 0,
               columnSpan: 3,
@@ -250,7 +249,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
 
             row: 1,
             column: 0,
@@ -263,7 +262,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 2,
               column: 0,
@@ -277,7 +276,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 3,
               column: 0,
@@ -291,7 +290,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 2,
               rowSpan: 2,
               column: 2,
@@ -301,7 +300,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 4,
             column: 0,
             columnSpan: 3,
@@ -313,7 +312,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 5,
               column: 0,
@@ -327,7 +326,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 6,
               column: 0,
@@ -341,7 +340,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 5,
               rowSpan: 2,
               column: 2,
@@ -444,7 +443,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
 
               row: 0,
               column: 0,
@@ -458,7 +457,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
 
             row: 1,
             column: 0,
@@ -471,7 +470,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 2,
               column: 0,
@@ -485,7 +484,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 3,
               column: 0,
@@ -499,7 +498,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 2,
               rowSpan: 2,
               column: 2,
@@ -509,7 +508,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 4,
             column: 0,
             columnSpan: 3,
@@ -521,7 +520,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 5,
               column: 0,
@@ -535,7 +534,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 6,
               column: 0,
@@ -549,7 +548,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 5,
               rowSpan: 2,
               column: 2,
@@ -634,7 +633,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 0,
               column: 0,
               columnSpan: 3,
@@ -647,7 +646,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 1,
             column: 0,
             columnSpan: 3,
@@ -659,7 +658,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 2,
               column: 0,
@@ -673,7 +672,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 3,
               column: 0,
@@ -687,7 +686,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 2,
               rowSpan: 2,
               column: 2,
@@ -697,7 +696,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 4,
             column: 0,
             columnSpan: 3,
@@ -709,7 +708,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 5,
               column: 0,
@@ -723,7 +722,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 6,
               column: 0,
@@ -737,7 +736,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 5,
               rowSpan: 2,
               column: 2,
@@ -827,7 +826,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 1,
               column: 0,
               columnSpan: 3,
@@ -840,7 +839,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 2,
             column: 0,
             columnSpan: 3,
@@ -852,7 +851,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 3,
               column: 0,
@@ -863,7 +862,7 @@ const BlockView = () => {
           ),
 
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 4,
             column: 0,
             columnSpan: 3,
@@ -875,7 +874,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               textEditor: window.TextEditor,
               row: 6,
               column: 0,
@@ -978,7 +977,7 @@ const BlockView = () => {
             textAlign: "center",
             font: "10pt helvetica, arial, sans-serif",
             stroke: "#333333",
-            editable: true,
+            editable: false,
           },
           new go.Binding("text").makeTwoWay()
         )

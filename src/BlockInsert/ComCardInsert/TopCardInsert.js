@@ -80,7 +80,7 @@ const TopCardInsert = ({
       </div>
       <div className="blockDataInsertBox">
         <div className="blockDataInsert">
-          <div>Card Key: </div>
+          <div>*Card Key: </div>
           <Input
             name="key"
             onChange={handleInsertTopData}
@@ -96,7 +96,7 @@ const TopCardInsert = ({
           /> */}
         </div>
         <div className="blockDataInsert">
-          <div>Card Title: </div>
+          <div>*Card Title: </div>
           <Input
             type="text"
             name="uuu_P6ActivityName"
@@ -112,7 +112,7 @@ const TopCardInsert = ({
           /> */}
         </div>
         <div className="blockDataInsert">
-          <div>Plan Date Start: </div>
+          <div>*Plan Date Start: </div>
           <DatePicker
             value={
               insertTopData.ddd_evm_plan_start.length > 0

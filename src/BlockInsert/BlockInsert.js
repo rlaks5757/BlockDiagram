@@ -12,7 +12,7 @@ import axios from "axios";
 import Url from "../url/fetchURL";
 import "./InsertModal.scss";
 
-const BlockInsert = ({ setTableData }) => {
+const BlockInsert = () => {
   const params = useParams();
   const [originalComBaseSet, setOriginalComBaseSet] = useState({});
   const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
@@ -1120,8 +1120,6 @@ const BlockInsert = ({ setTableData }) => {
 
       const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
 
-      setTableData(fetchData.data);
-
       const comData = await fetchData.data.com;
 
       // const topFetchData = await axios.get("/data/top.json");
@@ -1415,6 +1413,8 @@ const BlockInsert = ({ setTableData }) => {
     }
   };
 
+  console.log(insertTopData);
+
   const InsertBlockData = () => {
     const checkItem = comOriginalData.find(
       (com) => com.uuu_P6ActivityId === insertData.key
@@ -1424,20 +1424,43 @@ const BlockInsert = ({ setTableData }) => {
       insertData.record_no = checkItem.record_no;
     }
 
+    if (insertData.category === "Top") {
+    }
+
     const diagram = diagramRef.current?.getDiagram();
 
     const insertNodeData = JSON.parse(diagram.model.toJson());
 
     if (insertDataToggle) {
-      insertNodeData.nodeDataArray.push(insertData);
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+      if (
+        insertData.key.length > 0 &&
+        insertData.uuu_P6ActivityName.length > 0 &&
+        insertData.ddd_evm_plan_start.length > 0 &&
+        insertData.ddd_evm_plan_finish.length > 0
+      ) {
+        insertNodeData.nodeDataArray.push(insertData);
+        diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+        toggleDialog();
+        setInsertData(baseInsertComData);
+        setInsertTopData(baseInsertTopData);
+      } else {
+        alert("필수값을 모두 입력하여 주시기 바랍니다.");
+      }
     } else {
-      insertNodeData.nodeDataArray.push(insertTopData);
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+      if (
+        insertTopData.key.length > 0 &&
+        insertTopData.uuu_P6ActivityName.length > 0 &&
+        insertTopData.ddd_evm_plan_start.length > 0
+      ) {
+        insertNodeData.nodeDataArray.push(insertTopData);
+        diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+        toggleDialog();
+        setInsertData(baseInsertComData);
+        setInsertTopData(baseInsertTopData);
+      } else {
+        alert("필수값을 모두 입력하여 주시기 바랍니다.");
+      }
     }
-
-    setInsertData(baseInsertComData);
-    setInsertTopData(baseInsertTopData);
   };
 
   const finalDataSave = async () => {
@@ -1921,6 +1944,8 @@ const BlockInsert = ({ setTableData }) => {
 
   const toggleDialog = () => {
     setVisibleDialog(!visibleDialog);
+    setInsertData(baseInsertComData);
+    setInsertTopData(baseInsertTopData);
   };
 
   const handleProgressVisibleDialog = () => {
@@ -2005,7 +2030,6 @@ const BlockInsert = ({ setTableData }) => {
               <button
                 className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
                 onClick={() => {
-                  toggleDialog();
                   InsertBlockData();
                 }}
               >
