@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
 import moment from "moment";
 import { DatePicker } from "@progress/kendo-react-dateinputs";
 import { Input } from "@progress/kendo-react-inputs";
@@ -26,7 +26,7 @@ const ComCardInsert = ({
       } else {
         alert("Plan Date 시작일을 지정하여 주시기 바랍니다.");
       }
-    } else if (name === "ddd_evm_plan_finish") {
+    } else if (name === "ddd_evm_actual_finish") {
       if (insertData.ddd_evm_actual_start.length > 0) {
         setInsertData((prev) => {
           return {
@@ -40,7 +40,7 @@ const ComCardInsert = ({
           };
         });
       } else {
-        alert("Acutall Date 시작일을 지정하여 주시기 바랍니다.");
+        alert("Acutal Date 시작일을 지정하여 주시기 바랍니다.");
       }
     } else {
       setInsertData((prev) => {
@@ -137,7 +137,7 @@ const ComCardInsert = ({
       </div>
       <div className="blockDataInsertBox">
         <div className="blockDataInsert">
-          <div>Card Key: </div>
+          <div>*Card Key: </div>
           <Input
             name="key"
             onChange={(e) => {
@@ -149,7 +149,7 @@ const ComCardInsert = ({
         </div>
 
         <div className="blockDataInsert">
-          <div>Card Title: </div>
+          <div>*Card Title: </div>
           <Input
             type="text"
             name="uuu_P6ActivityName"
@@ -158,10 +158,10 @@ const ComCardInsert = ({
           />
         </div>
         <div className="blockDataInsert">
-          <div>Plan Date Start: </div>
+          <div>*Plan Date Start: </div>
           <DatePicker
             value={
-              insertData.ddd_evm_plan_start.length > 0
+              insertData.ddd_evm_plan_start !== ""
                 ? new Date(insertData.ddd_evm_plan_start)
                 : ""
             }
@@ -169,10 +169,10 @@ const ComCardInsert = ({
           />
         </div>
         <div className="blockDataInsert">
-          <div>Plan Date Finish: </div>
+          <div>*Plan Date Finish: </div>
           <DatePicker
             value={
-              insertData.ddd_evm_plan_finish.length > 0
+              insertData.ddd_evm_plan_finish !== ""
                 ? new Date(insertData.ddd_evm_plan_finish)
                 : ""
             }
@@ -183,7 +183,7 @@ const ComCardInsert = ({
           <div>Actual Date Start: </div>
           <DatePicker
             value={
-              insertData.ddd_evm_actual_start.length > 0
+              insertData.ddd_evm_actual_start !== ""
                 ? new Date(insertData.ddd_evm_actual_start)
                 : ""
             }
@@ -194,7 +194,7 @@ const ComCardInsert = ({
           <div>Actual Date Finish: </div>
           <DatePicker
             value={
-              insertData.ddd_evm_actual_finish.length > 0
+              insertData.ddd_evm_actual_finish !== ""
                 ? new Date(insertData.ddd_evm_actual_finish)
                 : ""
             }

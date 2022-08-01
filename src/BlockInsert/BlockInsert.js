@@ -12,7 +12,7 @@ import axios from "axios";
 import Url from "../url/fetchURL";
 import "./InsertModal.scss";
 
-const BlockInsert = ({ setTableData }) => {
+const BlockInsert = () => {
   const params = useParams();
   const [originalComBaseSet, setOriginalComBaseSet] = useState({});
   const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
@@ -1119,8 +1119,6 @@ const BlockInsert = ({ setTableData }) => {
       const diagram = await diagramRef.current?.getDiagram();
 
       const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
-      console.log(fetchData);
-      setTableData(fetchData.data);
 
       const comData = await fetchData.data.com;
 
@@ -1311,26 +1309,35 @@ const BlockInsert = ({ setTableData }) => {
         };
       });
     } else if (name === "key") {
-      const checkItem = comOriginalData.find(
-        (com) => com.uuu_P6ActivityId === value.toUpperCase()
-      );
+      // const checkItem = comOriginalData.find(
+      //   (com) => com.uuu_P6ActivityId === value.toUpperCase()
+      // );
+      // console.log(value.toUpperCase());
+      // console.log(checkItem);
 
-      if (checkItem !== undefined) {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-            record_no: checkItem.record_no,
-          };
-        });
-      } else {
-        setInsertData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-          };
-        });
-      }
+      // if (checkItem !== undefined) {
+      //   setInsertData((prev) => {
+      //     return {
+      //       ...prev,
+      //       key: value.toUpperCase(),
+      //       record_no: checkItem.record_no,
+      //     };
+      //   });
+      // } else {
+      //   setInsertData((prev) => {
+      //     return {
+      //       ...prev,
+      //       key: value.toUpperCase(),
+      //     };
+      //   });
+      // }
+
+      setInsertData((prev) => {
+        return {
+          ...prev,
+          key: value.toUpperCase(),
+        };
+      });
     } else if (name === "category") {
       if (value === "Turn-Over Package") {
         setInsertDataToogle(false);
@@ -1370,26 +1377,32 @@ const BlockInsert = ({ setTableData }) => {
         };
       });
     } else if (name === "key") {
-      const checkItem = comOriginalData.find(
-        (com) => com.uuu_P6ActivityId === value.toUpperCase()
-      );
+      // const checkItem = comOriginalData.find(
+      //   (com) => com.uuu_P6ActivityId === value.toUpperCase()
+      // );
 
-      if (checkItem !== undefined) {
-        setInsertTopData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-            record_no: checkItem.record_no,
-          };
-        });
-      } else {
-        setInsertTopData((prev) => {
-          return {
-            ...prev,
-            key: value.toUpperCase(),
-          };
-        });
-      }
+      // if (checkItem !== undefined) {
+      //   setInsertTopData((prev) => {
+      //     return {
+      //       ...prev,
+      //       key: value.toUpperCase(),
+      //       record_no: checkItem.record_no,
+      //     };
+      //   });
+      // } else {
+      //   setInsertTopData((prev) => {
+      //     return {
+      //       ...prev,
+      //       key: value.toUpperCase(),
+      //     };
+      //   });
+      // }
+      setInsertTopData((prev) => {
+        return {
+          ...prev,
+          key: value.toUpperCase(),
+        };
+      });
     } else {
       setInsertTopData((prev) => {
         return {
@@ -1400,23 +1413,54 @@ const BlockInsert = ({ setTableData }) => {
     }
   };
 
+  console.log(insertTopData);
+
   const InsertBlockData = () => {
-    console.log(insertData);
+    const checkItem = comOriginalData.find(
+      (com) => com.uuu_P6ActivityId === insertData.key
+    );
+
+    if (checkItem !== undefined) {
+      insertData.record_no = checkItem.record_no;
+    }
+
+    if (insertData.category === "Top") {
+    }
 
     const diagram = diagramRef.current?.getDiagram();
 
     const insertNodeData = JSON.parse(diagram.model.toJson());
 
     if (insertDataToggle) {
-      insertNodeData.nodeDataArray.push(insertData);
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+      if (
+        insertData.key.length > 0 &&
+        insertData.uuu_P6ActivityName.length > 0 &&
+        insertData.ddd_evm_plan_start.length > 0 &&
+        insertData.ddd_evm_plan_finish.length > 0
+      ) {
+        insertNodeData.nodeDataArray.push(insertData);
+        diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+        toggleDialog();
+        setInsertData(baseInsertComData);
+        setInsertTopData(baseInsertTopData);
+      } else {
+        alert("필수값을 모두 입력하여 주시기 바랍니다.");
+      }
     } else {
-      insertNodeData.nodeDataArray.push(insertTopData);
-      diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+      if (
+        insertTopData.key.length > 0 &&
+        insertTopData.uuu_P6ActivityName.length > 0 &&
+        insertTopData.ddd_evm_plan_start.length > 0
+      ) {
+        insertNodeData.nodeDataArray.push(insertTopData);
+        diagram.model = go.Model.fromJson(JSON.stringify(insertNodeData));
+        toggleDialog();
+        setInsertData(baseInsertComData);
+        setInsertTopData(baseInsertTopData);
+      } else {
+        alert("필수값을 모두 입력하여 주시기 바랍니다.");
+      }
     }
-
-    setInsertData(baseInsertComData);
-    setInsertTopData(baseInsertTopData);
   };
 
   const finalDataSave = async () => {
@@ -1427,8 +1471,6 @@ const BlockInsert = ({ setTableData }) => {
 
     let comData = [];
     let topData = [];
-
-    console.log(insertNodeData);
 
     await insertNodeData.nodeDataArray.forEach((com) => {
       if (com.category === "Top") {
@@ -1532,7 +1574,7 @@ const BlockInsert = ({ setTableData }) => {
                   return com3.key === com2.to;
                 }
               )[0]["uuu_P6ActivityName"],
-              dtsLineAutoSeq: "99999",
+              dtsLineAutoSeq: String(Math.round(Math.random() * 1000000000000)),
               short_desc: "1",
             });
           }
@@ -1555,7 +1597,7 @@ const BlockInsert = ({ setTableData }) => {
             com._bp_lineitems.push({
               dtsCommActivityBPK: com2.to,
               dtsDashCoordinates: com2.points.join(),
-              dtsLineAutoSeq: "99999",
+              dtsLineAutoSeq: String(Math.round(Math.random() * 1000000000000)),
               uuu_tab_id: "Relationship",
               short_desc: "1",
             });
@@ -1902,13 +1944,22 @@ const BlockInsert = ({ setTableData }) => {
 
   const toggleDialog = () => {
     setVisibleDialog(!visibleDialog);
+    setInsertData(baseInsertComData);
+    setInsertTopData(baseInsertTopData);
   };
 
   const handleProgressVisibleDialog = () => {
-    setProgressVisibleDialog(false);
-    setProgressActual(0);
-    setProgress(0);
-    setProgressTotal(0);
+    if (progressActual === 0) {
+      alert("업데이트가 진행 중입니다.");
+    } else if (progressActual === progressTotal) {
+      setProgressVisibleDialog(false);
+      setProgressActual(0);
+      setProgress(0);
+      setProgressTotal(0);
+      commissionFetch();
+    } else {
+      alert("업데이트가 진행 중입니다.");
+    }
   };
 
   return (
@@ -1979,7 +2030,6 @@ const BlockInsert = ({ setTableData }) => {
               <button
                 className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
                 onClick={() => {
-                  toggleDialog();
                   InsertBlockData();
                 }}
               >
@@ -1994,7 +2044,7 @@ const BlockInsert = ({ setTableData }) => {
               <ProgressBar
                 min={0}
                 max={100}
-                value={parseInt((progress / progressTotal) * 100)}
+                value={parseInt((progressActual / progressTotal) * 100)}
               />
               <div className="updateProgressResult">
                 처리결과:{" "}

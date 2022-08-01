@@ -3,26 +3,25 @@ import { useParams } from "react-router-dom";
 import * as go from "gojs";
 import { ReactDiagram, ReactOverview } from "gojs-react";
 import moment from "moment";
+import Url from "../url/fetchURL";
 import "./BlockView.scss";
 
 import axios from "axios";
 
 const BlockView = () => {
   const params = useParams();
-  const [originalComBaseSet, setOriginalComBaseSet] = useState({});
-  const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
-
-  const [comOriginalData, setComOriginalData] = useState([]);
-  const [topOriginalData, setTopOriginalData] = useState([]);
+  // const [originalComBaseSet, setOriginalComBaseSet] = useState({});
+  // const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
 
   const [loadModelData, setLoadModelData] = useState(false);
 
-  const diagramRef = useRef();
+  const [modelData, setModalDate] = useState({
+    class: "GraphLinksModel",
+    nodeDataArray: [],
+    linkDataArray: [],
+  });
 
-  const handleNodeClick = (e, node) => {
-    console.log(e);
-    console.log(node.diagram);
-  };
+  const diagramRef = useRef();
 
   const initDiagram = () => {
     const $ = go.GraphObject.make;
@@ -99,7 +98,9 @@ const BlockView = () => {
 
     const clickEvent = function (e, node) {
       // highlight all Links and Nodes coming out of a given Node
+
       var diagram = node.diagram;
+
       diagram.startTransaction("highlight");
       // remove any previous highlighting
       diagram.clearHighlighteds();
@@ -118,6 +119,17 @@ const BlockView = () => {
         n.isHighlighted = true;
       });
       diagram.commitTransaction("highlight");
+      handleNodeClick(node.data);
+    };
+
+    const linkClickEvent = (e, node) => {
+      myDiagram.commandHandler.doKeyDown = function () {
+        var ekey = myDiagram.lastInput;
+
+        if (ekey.key === "Backspace") {
+          e.diagram.commandHandler.deleteSelection();
+        }
+      };
     };
 
     var defaultAdornment = $(
@@ -144,10 +156,11 @@ const BlockView = () => {
       "High", // the default category
       $(
         go.Node,
+        "Vertical",
         { selectionAdornmentTemplate: defaultAdornment },
         go.Panel.Auto,
         nodeStyle(),
-        { click: handleNodeClick },
+        { click: clickEvent },
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
 
         $(
@@ -223,8 +236,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: true,
-
+              editable: false,
               row: 0,
               column: 0,
               columnSpan: 3,
@@ -237,7 +249,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
 
             row: 1,
             column: 0,
@@ -250,8 +262,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: true,
-
+              editable: false,
+              textEditor: window.TextEditor,
               row: 2,
               column: 0,
               columnSpan: 1,
@@ -264,8 +276,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
-              editable: true,
-
+              editable: false,
+              textEditor: window.TextEditor,
               row: 3,
               column: 0,
               columnSpan: 1,
@@ -278,7 +290,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 2,
               rowSpan: 2,
               column: 2,
@@ -288,7 +300,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 4,
             column: 0,
             columnSpan: 3,
@@ -296,20 +308,26 @@ const BlockView = () => {
             textAlign: "center",
             font: "bold 13px sans-serif",
           }),
-          $(go.TextBlock, new go.Binding("text", "actualDateS").makeTwoWay(), {
-            editable: true,
-            row: 5,
-            column: 0,
-            columnSpan: 1,
-            width: 100,
-            margin: 5,
-            textAlign: "center",
-          }),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
+            {
+              editable: false,
+              textEditor: window.TextEditor,
+              row: 5,
+              column: 0,
+              columnSpan: 1,
+              width: 100,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
           $(
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 6,
               column: 0,
               columnSpan: 1,
@@ -322,7 +340,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 5,
               rowSpan: 2,
               column: 2,
@@ -425,7 +443,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
 
               row: 0,
               column: 0,
@@ -439,7 +457,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
 
             row: 1,
             column: 0,
@@ -452,8 +470,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: true,
-
+              editable: false,
+              textEditor: window.TextEditor,
               row: 2,
               column: 0,
               columnSpan: 1,
@@ -466,7 +484,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 3,
               column: 0,
               columnSpan: 1,
@@ -479,7 +498,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 2,
               rowSpan: 2,
               column: 2,
@@ -489,7 +508,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 4,
             column: 0,
             columnSpan: 3,
@@ -501,7 +520,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 5,
               column: 0,
               columnSpan: 1,
@@ -514,7 +534,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 6,
               column: 0,
               columnSpan: 1,
@@ -527,7 +548,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 5,
               rowSpan: 2,
               column: 2,
@@ -612,7 +633,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 0,
               column: 0,
               columnSpan: 3,
@@ -625,7 +646,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 1,
             column: 0,
             columnSpan: 3,
@@ -637,7 +658,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 2,
               column: 0,
               columnSpan: 1,
@@ -650,7 +672,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 3,
               column: 0,
               columnSpan: 1,
@@ -663,7 +686,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 2,
               rowSpan: 2,
               column: 2,
@@ -673,7 +696,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 4,
             column: 0,
             columnSpan: 3,
@@ -685,7 +708,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 5,
               column: 0,
               columnSpan: 1,
@@ -698,7 +722,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 6,
               column: 0,
               columnSpan: 1,
@@ -711,7 +736,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 5,
               rowSpan: 2,
               column: 2,
@@ -787,7 +812,6 @@ const BlockView = () => {
           }),
           $(go.RowColumnDefinition, { row: 6, separatorStroke: "black" }),
           $(go.TextBlock, new go.Binding("text", "key").makeTwoWay(), {
-            editable: true,
             row: 0,
             column: 0,
             columnSpan: 3,
@@ -802,7 +826,7 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
               row: 1,
               column: 0,
               columnSpan: 3,
@@ -815,7 +839,7 @@ const BlockView = () => {
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 2,
             column: 0,
             columnSpan: 3,
@@ -827,7 +851,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 3,
               column: 0,
               columnSpan: 3,
@@ -837,7 +862,7 @@ const BlockView = () => {
           ),
 
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: true,
+            editable: false,
             row: 4,
             column: 0,
             columnSpan: 3,
@@ -849,7 +874,8 @@ const BlockView = () => {
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
-              editable: true,
+              editable: false,
+              textEditor: window.TextEditor,
               row: 6,
               column: 0,
               columnSpan: 3,
@@ -887,6 +913,7 @@ const BlockView = () => {
 
     myDiagram.linkTemplate = $(
       go.Link, // the whole link panel
+      { click: linkClickEvent },
       {
         routing: go.Link.AvoidsNodes,
         curve: go.Link.JumpOver,
@@ -950,7 +977,7 @@ const BlockView = () => {
             textAlign: "center",
             font: "10pt helvetica, arial, sans-serif",
             stroke: "#333333",
-            editable: true,
+            editable: false,
           },
           new go.Binding("text").makeTwoWay()
         )
@@ -990,9 +1017,7 @@ const BlockView = () => {
 
       const diagram = await diagramRef.current?.getDiagram();
 
-      const fetchData = await axios.get(
-        `http://localhost:8000/blockInfo/${params.id}`
-      );
+      const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
 
       const comData = await fetchData.data.com;
 
@@ -1070,6 +1095,9 @@ const BlockView = () => {
                 baseSet.linkDataArray.push({
                   from: com.uuu_P6ActivityId,
                   to: com2.dtsCommActivityBPK,
+                  points: com2.dtsDashCoordinates
+                    .split(",")
+                    .map((com) => Number(com)),
                   dtsLineAutoSeq: com2.dtsLineAutoSeq,
                 });
               });
@@ -1126,6 +1154,9 @@ const BlockView = () => {
               baseSet.linkDataArray.push({
                 from: com.dtsTOPCode,
                 to: com2.uuu_P6ActivityId,
+                points: com2.dtsDashCoordinates
+                  .split(",")
+                  .map((com) => Number(com)),
                 dtsLineAutoSeq: com2.dtsLineAutoSeq,
               });
             });
@@ -1133,17 +1164,9 @@ const BlockView = () => {
         }
       });
 
-      const comBaseSet = comData.filter((com) => com.status !== "Deleted");
-      const topBaseSet = topData.filter((com) => com.status !== "Deleted");
+      setModalDate(baseSet);
 
-      const comID = comData.map((com) => com.uuu_P6ActivityId);
-      const topID = topData.map((com) => com.dtsTOPCode);
-
-      setComOriginalData(comID);
-      setTopOriginalData(topID);
-
-      setOriginalComBaseSet(comBaseSet);
-      setOriginalTopBaseSet(topBaseSet);
+      // setTopOriginalData(topID);
       diagram.model = go.Model.fromJson(JSON.stringify(baseSet));
     } catch (err) {
       console.log(err);
@@ -1158,21 +1181,332 @@ const BlockView = () => {
     commissionFetch();
   }, [params]);
 
-  return (
-    <div className="blockView">
-      <ReactDiagram
-        ref={diagramRef}
-        initDiagram={initDiagram}
-        divClassName="diagram-component"
-      />
-      <ReactOverview
-        initOverview={initOverview}
-        divClassName="overview-component"
-        observedDiagram={
-          (loadModelData && diagramRef.current?.getDiagram()) || null
+  const handleNodeClick = async (nodeData) => {
+    const baseSet = {
+      class: "GraphLinksModel",
+      nodeDataArray: [],
+      linkDataArray: [],
+    };
+
+    const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
+
+    const comData = await fetchData.data.com;
+
+    // const topFetchData = await axios.get("/data/top.json");
+    // const topData = await topFetchData.data.data;
+    const topData = await fetchData.data.top;
+
+    await comData.forEach((com) => {
+      if (com.status !== "Deleted") {
+        if (com.dtsDashCoordinates !== null) {
+          baseSet.nodeDataArray.push({
+            key: com.uuu_P6ActivityId,
+            category: com.dtsPrioritySPD,
+            uuu_P6ActivityName: com.uuu_P6ActivityName,
+            planDate: "Plan Date",
+            ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
+              "MM-DD-YYYY"
+            ),
+            ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
+              "MM-DD-YYYY"
+            ),
+            uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
+            actualDate: "Actual Date",
+            ddd_evm_actual_start:
+              moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
+              "Invalid date"
+                ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
+                : null,
+            ddd_evm_actual_finish:
+              moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
+              "Invalid date"
+                ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
+                : null,
+            uuu_P6ActualDuration: com.uuu_P6ActualDuration,
+            loc: com.dtsDashCoordinates,
+            record_no: com.record_no,
+          });
+        } else {
+          baseSet.nodeDataArray.push({
+            key: com.uuu_P6ActivityId,
+            category: com.dtsPrioritySPD,
+            uuu_P6ActivityName: com.uuu_P6ActivityName,
+            planDate: "Plan Date",
+            ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
+              "MM-DD-YYYY"
+            ),
+            ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
+              "MM-DD-YYYY"
+            ),
+            uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
+            actualDate: "Actual Date",
+            ddd_evm_actual_start:
+              moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
+              "Invalid date"
+                ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
+                : null,
+            ddd_evm_actual_finish:
+              moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
+              "Invalid date"
+                ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
+                : null,
+            uuu_P6ActualDuration: com.uuu_P6ActualDuration,
+
+            record_no: com.record_no,
+          });
         }
-      />
-    </div>
+      }
+    });
+
+    await comData.forEach((com) => {
+      if (com.status !== "Deleted") {
+        if (com._bp_lineitems !== undefined) {
+          if (com._bp_lineitems.length > 0) {
+            com._bp_lineitems.forEach((com2) => {
+              baseSet.linkDataArray.push({
+                from: com.uuu_P6ActivityId,
+                to: com2.dtsCommActivityBPK,
+                points: com2.dtsDashCoordinates
+                  .split(",")
+                  .map((com) => Number(com)),
+                dtsLineAutoSeq: com2.dtsLineAutoSeq,
+              });
+            });
+          }
+        }
+      }
+    });
+
+    await topData.forEach((com) => {
+      if (com.status !== "Deleted") {
+        if (com.dtsDashCoordinates !== null) {
+          baseSet.nodeDataArray.push({
+            key: com.dtsTOPCode,
+            category: "Top",
+            uuu_P6ActivityName: com.dtsTOPTitle,
+            planDate: "Plan Date",
+            ddd_evm_plan_start: moment(com.dtsPlanHODate).format("MM-DD-YYYY"),
+            actualDate: "Actual Date",
+            ddd_evm_actual_start:
+              moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
+              "Invalid date"
+                ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
+                : null,
+            loc: com.dtsDashCoordinates,
+            record_no: com.record_no,
+          });
+        } else {
+          baseSet.nodeDataArray.push({
+            key: com.dtsTOPCode,
+            category: "Top",
+            uuu_P6ActivityName: com.dtsTOPTitle,
+            planDate: "Plan Date",
+            ddd_evm_plan_start: moment(com.dtsPlanHODate).format("MM-DD-YYYY"),
+            actualDate: "Actual Date",
+            ddd_evm_actual_start:
+              moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
+              "Invalid date"
+                ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
+                : null,
+            record_no: com.record_no,
+          });
+        }
+      }
+    });
+
+    await topData.forEach((com) => {
+      if (com.status !== "Deleted") {
+        if (com._bp_lineitems !== undefined) {
+          com._bp_lineitems.forEach((com2) => {
+            baseSet.linkDataArray.push({
+              from: com.dtsTOPCode,
+              to: com2.uuu_P6ActivityId,
+              points: com2.dtsDashCoordinates
+                .split(",")
+                .map((com) => Number(com)),
+              dtsLineAutoSeq: com2.dtsLineAutoSeq,
+            });
+          });
+        }
+      }
+    });
+
+    const diagram = diagramRef.current?.getDiagram();
+
+    const nowDiagramData = JSON.parse(diagram.model.toJson());
+
+    const successorLink = baseSet.linkDataArray.filter(
+      (com) => com.from === nodeData.key
+    );
+
+    const predecessorLink = baseSet.linkDataArray.filter(
+      (com) => com.to === nodeData.key
+    );
+
+    const nodeItem = [];
+    const linkItem = successorLink.concat(predecessorLink);
+
+    successorLink.forEach((com) => {
+      baseSet.nodeDataArray.forEach((com2) => {
+        if (com.to === com2.key) {
+          nodeItem.push(com2);
+        }
+      });
+    });
+
+    predecessorLink.forEach((com) => {
+      baseSet.nodeDataArray.forEach((com2) => {
+        if (com.from === com2.key) {
+          nodeItem.push(com2);
+        }
+      });
+    });
+
+    const finalNode = nodeItem.filter(
+      (x) =>
+        !JSON.stringify(nowDiagramData.nodeDataArray).includes(
+          JSON.stringify(x)
+        )
+    );
+
+    const finalLink = linkItem.filter(
+      (x) =>
+        !JSON.stringify(nowDiagramData.linkDataArray).includes(
+          JSON.stringify(x)
+        )
+    );
+
+    nowDiagramData.nodeDataArray =
+      nowDiagramData.nodeDataArray.concat(finalNode);
+
+    const linkData = nowDiagramData.linkDataArray.concat(finalLink);
+
+    const finalLinkData = linkData.filter((item, i) => {
+      return (
+        linkData.findIndex((item2, j) => {
+          return item.to === item2.to && item.from === item2.from;
+        }) === i
+      );
+    });
+
+    nowDiagramData.linkDataArray = finalLinkData;
+
+    if (
+      finalNode.length > 0 ||
+      finalLinkData.length !== nowDiagramData.linkDataArray.length
+    ) {
+      diagram.model = go.Model.fromJson(JSON.stringify(nowDiagramData));
+    }
+  };
+
+  const filterNodeData = (cate) => {
+    const diagram = diagramRef.current?.getDiagram();
+
+    if (cate === "reset") {
+      diagram.model = go.Model.fromJson(JSON.stringify(modelData));
+    } else {
+      let filteringModel = { ...modelData };
+      const filterNodeDataArray = modelData.nodeDataArray.filter((com) => {
+        return com.category === cate;
+      });
+
+      filteringModel.nodeDataArray = filterNodeDataArray;
+
+      const linkFilterArray = modelData.nodeDataArray.filter((com) => {
+        return com.category !== cate;
+      });
+
+      const test0 = linkFilterArray.map((com) => com.key);
+
+      const test1 = modelData.linkDataArray.filter((com) => {
+        return test0.some((com2) => {
+          return com.to === com2;
+        });
+      });
+
+      const test2 = modelData.linkDataArray.filter((com) => {
+        return test0.some((com2) => {
+          return com.from === com2;
+        });
+      });
+
+      const totalTest = [];
+
+      test1.map((com) => {
+        return totalTest.push(com);
+      });
+
+      test2.map((com) => {
+        return totalTest.push(com);
+      });
+
+      const totalTestResult = [...new Set(totalTest)];
+
+      const linkDataArrayResult = [...modelData.linkDataArray].filter(
+        (com) => !totalTestResult.includes(com)
+      );
+
+      filteringModel.linkDataArray = linkDataArrayResult;
+
+      diagram.model = go.Model.fromJson(JSON.stringify(filteringModel));
+    }
+  };
+
+  return (
+    <>
+      <div className="blockInsert">
+        <ReactDiagram
+          ref={diagramRef}
+          initDiagram={initDiagram}
+          divClassName="diagram-component"
+        />
+        <ReactOverview
+          initOverview={initOverview}
+          divClassName="overview-component"
+          observedDiagram={
+            (loadModelData && diagramRef.current?.getDiagram()) || null
+          }
+        />
+
+        <div className="controlButtonBox">
+          <button
+            onClick={() => {
+              filterNodeData("High");
+            }}
+          >
+            High
+          </button>
+          <button
+            onClick={() => {
+              filterNodeData("Medium");
+            }}
+          >
+            Medium
+          </button>
+          <button
+            onClick={() => {
+              filterNodeData("Low");
+            }}
+          >
+            Low
+          </button>
+          <button
+            onClick={() => {
+              filterNodeData("Top");
+            }}
+          >
+            TOP
+          </button>
+          <button
+            onClick={() => {
+              filterNodeData("reset");
+            }}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+    </>
   );
 };
 
