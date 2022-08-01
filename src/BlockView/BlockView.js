@@ -10,8 +10,6 @@ import axios from "axios";
 
 const BlockView = () => {
   const params = useParams();
-  // const [originalComBaseSet, setOriginalComBaseSet] = useState({});
-  // const [originalTopBaseSet, setOriginalTopBaseSet] = useState({});
 
   const [loadModelData, setLoadModelData] = useState(false);
 
