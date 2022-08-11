@@ -39,6 +39,14 @@ const BlockInsert = () => {
 
   const diagramRef = useRef();
 
+  useEffect(() => {
+    document.addEventListener("keydown", function (event) {
+      console.log(
+        `Key: ${event.key} with keycode ${event.keyCode} has been pressed`
+      );
+    });
+  });
+
   const useConfirm = (message = null, onConfirm, onCancel) => {
     if (!onConfirm || typeof onConfirm !== "function") {
       return;
@@ -124,10 +132,12 @@ const BlockInsert = () => {
 
     myDiagram.commandHandler.doKeyDown = function () {
       var e = myDiagram.lastInput;
+
       if (e.key === "Backspace") {
         confirmDelete();
         return;
       } else {
+        return;
       }
     };
 
@@ -215,10 +225,14 @@ const BlockInsert = () => {
 
       diagram.commandHandler.doKeyDown = function () {
         var e = myDiagram.lastInput;
+
+        if (e.control) return;
+
         if (e.key === "Backspace") {
           confirmDelete();
           return;
         } else {
+          return;
         }
       };
     };
@@ -1196,9 +1210,12 @@ const BlockInsert = () => {
                 baseSet.linkDataArray.push({
                   from: com.uuu_P6ActivityId,
                   to: com2.dtsCommActivityBPK,
-                  points: com2.dtsDashCoordinates
-                    .split(",")
-                    .map((com) => Number(com)),
+                  points:
+                    com2.dtsDashCoordinates !== null
+                      ? com2.dtsDashCoordinates
+                          .split(",")
+                          .map((com) => Number(com))
+                      : null,
                   dtsLineAutoSeq: com2.dtsLineAutoSeq,
                 });
               });
@@ -1255,9 +1272,12 @@ const BlockInsert = () => {
               baseSet.linkDataArray.push({
                 from: com.dtsTOPCode,
                 to: com2.uuu_P6ActivityId,
-                points: com2.dtsDashCoordinates
-                  .split(",")
-                  .map((com) => Number(com)),
+                points:
+                  com2.dtsDashCoordinates !== null
+                    ? com2.dtsDashCoordinates
+                        .split(",")
+                        .map((com) => Number(com))
+                    : null,
                 dtsLineAutoSeq: com2.dtsLineAutoSeq,
               });
             });
