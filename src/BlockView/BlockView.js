@@ -1395,6 +1395,11 @@ const BlockView = () => {
 
     nowDiagramData.linkDataArray = finalLinkData;
 
+    console.log(linkItem);
+    console.log(linkData);
+    console.log(finalLinkData);
+    console.log(nowDiagramData);
+
     if (
       finalNode.length > 0 ||
       finalLinkData.length !== nowDiagramData.linkDataArray.length
