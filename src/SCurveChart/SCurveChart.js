@@ -31,7 +31,12 @@ const SCurveChart = () => {
   useEffect(() => {
     const commissionFetch = async () => {
       const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
-      const originalData = fetchData.data.com.sort((a, b) => {
+
+      const filteringData = fetchData.data.com.filter(
+        (com) => com.status !== "Deleted"
+      );
+
+      const originalData = filteringData.sort((a, b) => {
         a = new Date(a.ddd_evm_plan_start);
         b = new Date(b.ddd_evm_plan_start);
         return a < b ? -1 : a > b ? 1 : 0;
@@ -39,7 +44,7 @@ const SCurveChart = () => {
       //catefories
       const diffMonth = getMonthDifference(
         new Date(originalData[0].ddd_evm_plan_start),
-        new Date(originalData[originalData.length - 1].ddd_evm_plan_start)
+        new Date(originalData[originalData.length - 1].ddd_evm_plan_finish)
       );
 
       const cateforiesArr = [];
@@ -84,12 +89,11 @@ const SCurveChart = () => {
       }, 0);
 
       //actaul & c_actaul
-
       const originalDataAct = [];
 
       originalData.forEach((com) => {
         for (let i = 0; i < com.uuu_P6ActualDuration; i++) {
-          if (com.ddd_evm_actual_start !== null && com.ddd_evm_actual_finish)
+          if (com.status === "Completed")
             originalDataAct.push({
               date: moment(new Date(com.ddd_evm_actual_start))
                 .add(i, "days")
@@ -122,8 +126,7 @@ const SCurveChart = () => {
         return false;
       }, 0);
 
-      //result
-
+      //Chart Data Result
       setChartData((prev) => {
         return {
           ...prev,
@@ -161,26 +164,13 @@ const SCurveChart = () => {
       const tableDataBase = cateforiesArr.map((com) => {
         return {
           date: com,
-          plan:
-            resultPlan
-              .filter((com2) => com2.date === com)
-              .map((com3) => com3.value)[0] / 1000,
-          c_plan:
-            resultPlan
-              .filter((com2) => com2.date === com)
-              .map((com3) => com3.reduce)[0] / 1000,
-          act:
-            resultAct
-              .filter((com2) => com2.date === com)
-              .map((com3) => com3.value)[0] / 1000,
+          plan: resultPlan.find((com2) => com2.date === com)["value"] / 1000,
+          c_plan: resultPlan.find((com2) => com2.date === com)["reduce"] / 1000,
+          act: resultAct.find((com2) => com2.date === com)["value"] / 1000,
           c_act:
-            resultAct
-              .filter((com2) => com2.date === com)
-              .map((com3) => com3.reduce)[0] === undefined
+            resultAct.find((com2) => com2.date === com)["reduce"] === undefined
               ? 0
-              : resultAct
-                  .filter((com2) => com2.date === com)
-                  .map((com3) => com3.reduce)[0] / 1000,
+              : resultAct.find((com2) => com2.date === com)["reduce"] / 1000,
         };
       });
 

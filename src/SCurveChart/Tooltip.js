@@ -3,7 +3,6 @@ import React from "react";
 const Tooltip = (props) => {
   const { points } = props;
 
-  console.log(points[0].point);
   return (
     <div>
       {points.map((com, idx) => {
