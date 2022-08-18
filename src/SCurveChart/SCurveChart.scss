@@ -1,0 +1,40 @@
+.sCurveTable {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  .sCurveTableHeader {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    font-weight: bold;
+    background-color: #fafafa;
+
+    .sCurveTableHeaderItem {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .sCurveTableBody {
+    .sCurveTableBodyCol {
+      display: flex;
+      align-items: center;
+      height: 40px;
+
+      .sCurveTableBodyItem {
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+    }
+  }
+}
