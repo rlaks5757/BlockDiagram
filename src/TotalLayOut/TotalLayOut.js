@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { TabStrip, TabStripTab } from "@progress/kendo-react-layout";
 import KendoTable from "../KendoTable/KendoTable";
 import BlockInsert from "../BlockInsert/BlockInsert";
@@ -14,13 +14,13 @@ const TotalLayOut = () => {
 
   return (
     <TabStrip selected={selected} onSelect={handleSelect}>
-      <TabStripTab title="Commissioning S-Curve">
-        <SCurveChart />
-      </TabStripTab>
       <TabStripTab title="Flow-Diagram">
         <BlockView />
       </TabStripTab>
-      <TabStripTab title="Flow-Diagram Data">
+      <TabStripTab title="Commissioning S-Curve">
+        <SCurveChart />
+      </TabStripTab>
+      <TabStripTab title="Flow-Diagram Table">
         <KendoTable />
       </TabStripTab>
       <TabStripTab title="Flow-Diagram Insert">

@@ -8,11 +8,13 @@ import {
   ChartCategoryAxisItem,
   ChartTitle,
   ChartLegend,
+  ChartTooltip,
 } from "@progress/kendo-react-charts";
 import "hammerjs";
 import axios from "axios";
 import moment from "moment";
 import _ from "lodash";
+import Tooltip from "./Tooltip";
 import Url from "../url/fetchURL";
 import "./SCurveChart.scss";
 
@@ -207,36 +209,40 @@ const SCurveChart = () => {
     },
   ];
 
+  const tooltipRender = (context) => <Tooltip {...context} />;
+
   return (
     <div>
-      <div>SCurveChart</div>
-      <Chart
-        style={{
-          height: 350,
-        }}
-      >
-        <ChartTitle text="Commissioning S-Curve Chart" />
-        <ChartLegend position="bottom" orientation="horizontal" />
-        <ChartCategoryAxis>
-          <ChartCategoryAxisItem
-            categories={chartData.categories}
-            startAngle={45}
-          />
-        </ChartCategoryAxis>
-        <ChartSeries>
-          {chartData.series.map((item, idx) => (
-            <ChartSeriesItem
-              key={idx}
-              type={item.type}
-              tooltip={{
-                visible: true,
-              }}
-              data={item.data}
-              name={item.name}
+      {chartData.categories.length > 0 && (
+        <Chart
+          style={{
+            height: 350,
+          }}
+        >
+          <ChartTitle text="Commissioning S-Curve" />
+          <ChartLegend position="bottom" orientation="horizontal" />
+          <ChartCategoryAxis>
+            <ChartCategoryAxisItem
+              categories={chartData.categories}
+              startAngle={45}
             />
-          ))}
-        </ChartSeries>
-      </Chart>
+          </ChartCategoryAxis>
+          <ChartTooltip shared={true} render={tooltipRender} />
+          <ChartSeries>
+            {chartData.series.map((item, idx) => (
+              <ChartSeriesItem
+                key={idx}
+                type={item.type}
+                tooltip={{
+                  visible: true,
+                }}
+                data={item.data}
+                name={item.name}
+              />
+            ))}
+          </ChartSeries>
+        </Chart>
+      )}
       {tableData.length > 0 && (
         <div className="sCurveTable">
           <div className="sCurveTableHeader">
