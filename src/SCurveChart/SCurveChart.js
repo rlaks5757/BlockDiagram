@@ -28,8 +28,6 @@ const SCurveChart = () => {
 
   const [tableData, setTableData] = useState([]);
 
-  const [actualDate, setActualDate] = useState(new Date());
-
   useEffect(() => {
     const commissionFetch = async () => {
       const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
