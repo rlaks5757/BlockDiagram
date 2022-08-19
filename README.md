@@ -1,70 +1,43 @@
-# Getting Started with Create React App
+# Block Diagram Development
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Development Information
 
-## Available Scripts
+Commissioning Flow Diagram Development and S-Curve Chart, Data Table
 
-In the project directory, you can run:
+## 적용 기술
 
-### `npm start`
+Java Script, React, Kendo, Go-Js, Moment, Lodash, Axios, Sass
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Page Information
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+#### 1. Main Page
 
-### `npm test`
+- Kendo Layout 중 TabStrip, TabStripTab를 사용하여 Tab Menu 구현
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### 2. Flow-Diagram Page
 
-### `npm run build`
+- Go-Js를 사용하여 DB에서 호출한 Data를 Flow Diagram으로 구현 <br />
+  우측 하단 버튼을 이용하여 Category별 Filtering 기능 구현 <br />
+  Filtering 이후 Flow Diagram 내의 Card를 클릭 시 Relationship에 연관된 Card를 호출함 <br />
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  <img width="1440" alt="스크린샷 2022-08-19 오전 9 08 28" src="https://user-images.githubusercontent.com/94714426/185515836-d19065de-76fd-4e0a-8c52-2d0a2fb54ef3.png">
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### 3. Commissioning S-Curve
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Kendo Chart를 사용하여 DB에서 호출한 Data를 S-Curve으로 구현 <br />
 
-### `npm run eject`
+<img width="1440" alt="스크린샷 2022-08-19 오전 9 08 35" src="https://user-images.githubusercontent.com/94714426/185515929-20714944-2ba6-46ab-ba5d-dbfca652a0f5.png">
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### 4. Flow-Diagram Table
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Kendo Table를 사용하여 DB에서 호출한 Data를 Table로 구현 <br />
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+<img width="1440" alt="스크린샷 2022-08-19 오전 9 08 48" src="https://user-images.githubusercontent.com/94714426/185515931-e5cc279d-0571-43c7-976b-79ec613a238f.png">
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+#### 5. Flow-Diagram Insert
 
-## Learn More
+- Go-Js를 사용하여 DB에서 호출한 Data를 Flow Diagram으로 구현 <br />
+  User가 직접 Flow Diagram Card를 추가할 수 있는 Page 구현 <br />
+  Kendo Dialog를 사용하여 Modal 구현 <br />
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+<img width="1440" alt="스크린샷 2022-08-19 오전 9 09 05" src="https://user-images.githubusercontent.com/94714426/185515937-89db736f-11ad-42b3-add9-0edb26cd4a6c.png">
