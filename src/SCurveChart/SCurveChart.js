@@ -28,6 +28,8 @@ const SCurveChart = () => {
 
   const [tableData, setTableData] = useState([]);
 
+  const [actualDate, setActualDate] = useState(new Date());
+
   useEffect(() => {
     const commissionFetch = async () => {
       const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
@@ -180,6 +182,41 @@ const SCurveChart = () => {
     commissionFetch();
   }, [params]);
 
+  const tableContent = (com, com1) => {
+    if (com.field === "diff") {
+      if (handleActionDate(com1)) {
+        return (com1["act"] - com1["plan"]).toFixed(2);
+      } else {
+        return "-";
+      }
+    } else if (com.field === "c_diff") {
+      if (handleActionDate(com1)) {
+        return (com1["c_act"] - com1["c_plan"]).toFixed(2);
+      } else {
+        return "-";
+      }
+    } else if (com.field === "act" || com.field === "c_act") {
+      if (handleActionDate(com1)) {
+        return com1[com.field].toFixed(2);
+      } else {
+        return "-";
+      }
+    } else {
+      return com1[com.field].toFixed(2);
+    }
+  };
+
+  const handleActionDate = (date) => {
+    const actDate = new Date();
+    actDate.setFullYear(`20${date.date.slice(0, 2)}`);
+    actDate.setMonth(date.date.slice(4, 6) - 1);
+
+    if (moment(actDate).format("YY-MM") <= moment().format("YY-MM")) {
+      return true;
+    }
+    return false;
+  };
+
   const fieldData = [
     {
       name: "월간 계획",
@@ -190,12 +227,20 @@ const SCurveChart = () => {
       field: "act",
     },
     {
+      name: "월간 차이",
+      field: "diff",
+    },
+    {
       name: "누적 계획",
       field: "c_plan",
     },
     {
       name: "누적 실적",
       field: "c_act",
+    },
+    {
+      name: "누적 차이",
+      field: "c_diff",
     },
   ];
 
@@ -272,16 +317,22 @@ const SCurveChart = () => {
                       <div
                         key={idx}
                         className="sCurveTableBodyItem"
-                        style={{ width: 82 / tableData.length + 2 + "%" }}
+                        style={{
+                          width: 82 / tableData.length + 2 + "%",
+                          fontWeight: com.field.includes("diff") && "bold",
+                          color: Number(tableContent(com, com1)) < 0 && "red",
+                        }}
                       >
-                        {com1[com.field].toFixed(2)}
+                        {tableContent(com, com1)}
                       </div>
                     ))}
                     <div
                       className="sCurveTableBodyItem"
                       style={{ width: "10%", fontWeight: "bold" }}
                     >
-                      {com.field === "plan"
+                      {com.field.includes("diff")
+                        ? "-"
+                        : com.field === "plan"
                         ? tableData[tableData.length - 1]["c_plan"].toFixed(2)
                         : com.field === "act"
                         ? tableData
