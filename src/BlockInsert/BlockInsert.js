@@ -1316,7 +1316,7 @@ const BlockInsert = () => {
 
   useEffect(() => {
     commissionFetch();
-  }, [params]);
+  }, [params.id]);
 
   const handleInsertData = (e) => {
     const { value, name } = e.target;
