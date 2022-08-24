@@ -343,6 +343,15 @@ const SCurveChart = () => {
       : e.value;
   };
 
+  const seriesLabels = {
+    visible: true,
+    // Note that visible defaults to false
+    padding: 0,
+    font: "0.9rem Arial, sans-serif",
+    background: "none",
+    rotation: { angle: "auto" },
+  };
+
   return (
     <div>
       {chartData.categories.length > 0 && (
@@ -365,6 +374,7 @@ const SCurveChart = () => {
             <ChartCategoryAxisItem
               categories={chartData.categories}
               startAngle={45}
+              labels={seriesLabels}
             />
           </ChartCategoryAxis>
           <ChartTooltip shared={true} render={tooltipRender} />
