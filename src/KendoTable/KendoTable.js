@@ -6,33 +6,6 @@ import { process } from "@progress/kendo-data-query";
 import axios from "axios";
 import Url from "../url/fetchURL";
 
-// import {
-//   IntlProvider,
-//   load,
-//   LocalizationProvider,
-//   loadMessages,
-//   IntlService,
-// } from "@progress/kendo-react-intl";
-
-// import likelySubtags from "cldr-core/supplemental/likelySubtags.json";
-// import currencyData from "cldr-core/supplemental/currencyData.json";
-// import weekData from "cldr-core/supplemental/weekData.json";
-// import numbers from "cldr-numbers-full/main/es/numbers.json";
-// import currencies from "cldr-numbers-full/main/es/currencies.json";
-// import caGregorian from "cldr-dates-full/main/es/ca-gregorian.json";
-// import dateFields from "cldr-dates-full/main/es/dateFields.json";
-// import timeZoneNames from "cldr-dates-full/main/es/timeZoneNames.json";
-// load(
-//   likelySubtags,
-//   currencyData,
-//   weekData,
-//   numbers,
-//   currencies,
-//   caGregorian,
-//   dateFields,
-//   timeZoneNames
-// );
-
 const KendoTable = () => {
   const params = useParams();
 
@@ -150,13 +123,13 @@ const KendoTable = () => {
           });
         }
       });
-      console.log(tableDataSet);
+
       setCustomTableData(tableDataSet);
       setDataResult(process(tableDataSet, dataState));
     };
 
     dataFetch();
-  }, [params]);
+  }, [dataState, params.id]);
 
   return (
     <>
@@ -178,7 +151,7 @@ const KendoTable = () => {
           onDataStateChange={dataStateChange}
           detail={DetailComponent}
           expandField="expanded"
-          onExpandChange={expandChange}
+          // onExpandChange={expandChange}
         >
           <GridColumn field="Category" width="150px" />
           <GridColumn field="Activity_ID" width="150px" />

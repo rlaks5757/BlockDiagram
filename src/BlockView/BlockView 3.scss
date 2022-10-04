@@ -1,0 +1,25 @@
+.blockView {
+  position: relative;
+  display: flex;
+  // flex-wrap: wrap;
+  width: 100%;
+  height: 700px;
+
+  .diagram-component {
+    // width: 80%;
+    height: 100%;
+    flex-grow: 1;
+    border: 1px solid black;
+  }
+
+  .overview-component {
+    z-index: 99;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 150px;
+    height: 100px;
+    background-color: aliceblue;
+    border: 1px solid black;
+  }
+}
