@@ -4,33 +4,40 @@ import {
   Chart,
   ChartSeries,
   ChartSeriesItem,
+  ChartValueAxis,
+  ChartValueAxisItem,
   ChartCategoryAxis,
   ChartCategoryAxisItem,
   ChartTitle,
   ChartLegend,
   ChartTooltip,
 } from "@progress/kendo-react-charts";
+import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import "hammerjs";
 import axios from "axios";
 import moment from "moment";
 import _ from "lodash";
 import Tooltip from "./Tooltip";
 import Url from "../url/fetchURL";
+import useViewPort from "../Hooks/useViewPort";
 import "./SCurveChart.scss";
 
 const SCurveChart = () => {
+  const { height } = useViewPort();
   const params = useParams();
 
   const [chartData, setChartData] = useState({
     categories: [],
     series: [],
   });
-
+  console.log(chartData);
   const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
     const commissionFetch = async () => {
-      const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
+      const fetchData = await axios.get(
+        `${Url}/blockInfo/${params.project_code}`
+      );
 
       const filteringData = fetchData.data.com.filter(
         (com) => com.status !== "Deleted"
@@ -165,12 +172,22 @@ const SCurveChart = () => {
         return {
           date: com,
           plan: resultPlan.find((com2) => com2.date === com)["value"] / 1000,
-          c_plan: resultPlan.find((com2) => com2.date === com)["reduce"] / 1000,
           act: resultAct.find((com2) => com2.date === com)["value"] / 1000,
+          diff:
+            resultAct.find((com2) => com2.date === com)["reduce"] === undefined
+              ? 0
+              : resultAct.find((com2) => com2.date === com)["value"] / 1000 -
+                resultPlan.find((com2) => com2.date === com)["value"] / 1000,
+          c_plan: resultPlan.find((com2) => com2.date === com)["reduce"] / 1000,
           c_act:
             resultAct.find((com2) => com2.date === com)["reduce"] === undefined
               ? 0
               : resultAct.find((com2) => com2.date === com)["reduce"] / 1000,
+          c_diff:
+            resultAct.find((com2) => com2.date === com)["reduce"] === undefined
+              ? 0
+              : resultAct.find((com2) => com2.date === com)["reduce"] / 1000 -
+                resultPlan.find((com2) => com2.date === com)["reduce"] / 1000,
         };
       });
 
@@ -178,7 +195,42 @@ const SCurveChart = () => {
     };
 
     commissionFetch();
-  }, [params]);
+  }, [params.project_code]);
+
+  const tableContent = (com, com1) => {
+    if (com.field === "diff") {
+      if (handleActionDate(com1)) {
+        return (com1["act"] - com1["plan"]).toFixed(2);
+      } else {
+        return "-";
+      }
+    } else if (com.field === "c_diff") {
+      if (handleActionDate(com1)) {
+        return (com1["c_act"] - com1["c_plan"]).toFixed(2);
+      } else {
+        return "-";
+      }
+    } else if (com.field === "act" || com.field === "c_act") {
+      if (handleActionDate(com1)) {
+        return com1[com.field].toFixed(2);
+      } else {
+        return "-";
+      }
+    } else {
+      return com1[com.field].toFixed(2);
+    }
+  };
+
+  const handleActionDate = (date) => {
+    const actDate = new Date();
+    actDate.setFullYear(`20${date.date.slice(0, 2)}`);
+    actDate.setMonth(date.date.slice(4, 6) - 1);
+
+    if (moment(actDate).format("YY-MM") <= moment().format("YY-MM")) {
+      return true;
+    }
+    return false;
+  };
 
   const fieldData = [
     {
@@ -190,6 +242,10 @@ const SCurveChart = () => {
       field: "act",
     },
     {
+      name: "월간 차이",
+      field: "diff",
+    },
+    {
       name: "누적 계획",
       field: "c_plan",
     },
@@ -197,24 +253,130 @@ const SCurveChart = () => {
       name: "누적 실적",
       field: "c_act",
     },
+    {
+      name: "누적 차이",
+      field: "c_diff",
+    },
   ];
 
   const tooltipRender = (context) => <Tooltip {...context} />;
+
+  const normalcell = (props) => {
+    const field = props.field || "";
+    const cell = props.dataItem[field];
+
+    const handleFontColor = () => {
+      if (field === "diff" || field === "c_diff") {
+        if (cell < 0) {
+          return "red";
+        } else {
+          return "blue";
+        }
+      } else {
+        return;
+      }
+    };
+
+    const handleFontWeight = () => {
+      if (field === "diff" || field === "c_diff") {
+        return "bold";
+      } else {
+        return;
+      }
+    };
+
+    const actDate = new Date();
+    actDate.setFullYear(`20${props.dataItem.date.slice(0, 2)}`);
+    actDate.setMonth(props.dataItem.date.slice(4, 6) - 1);
+
+    return (
+      <>
+        {moment(actDate).format("YY-MM") <= moment().format("YY-MM") ? (
+          <td
+            colSpan={props.colSpan}
+            aria-colindex={props.columnIndex}
+            data-grid-col-index={props.dataIndex}
+            style={{
+              color: handleFontColor(),
+              fontWeight: handleFontWeight(),
+            }}
+          >
+            {cell.toFixed(2)}
+          </td>
+        ) : (
+          <td
+            colSpan={props.colSpan}
+            aria-colindex={props.columnIndex}
+            data-grid-col-index={props.dataIndex}
+          >
+            {field === "plan" || field === "c_plan" ? cell.toFixed(2) : "-"}
+          </td>
+        )}
+      </>
+    );
+  };
+
+  const SimpleSumCell = (props) => {
+    const field = props.field || "";
+
+    if (field !== "date") {
+      const total = _.sumBy(
+        tableData.filter((item) => typeof item[field] !== "undefined"),
+        field
+      );
+
+      return (
+        <td colSpan={props.colSpan} style={{ textAlign: "right" }}>
+          {total.toFixed(2)}
+        </td>
+      );
+    } else {
+      return (
+        <td colSpan={props.colSpan} style={{ textAlign: "center" }}>
+          합계
+        </td>
+      );
+    }
+  };
+
+  const labelContentAxis = (e) => {
+    return e.value > 100000000
+      ? (e.value / 100000000).toFixed(2) + "억"
+      : e.value;
+  };
+
+  const seriesLabels = {
+    visible: true,
+    // Note that visible defaults to false
+    padding: 0,
+    font: "0.9rem Arial, sans-serif",
+    background: "none",
+    rotation: { angle: "auto" },
+  };
 
   return (
     <div>
       {chartData.categories.length > 0 && (
         <Chart
           style={{
-            height: 350,
+            height: (height - 65) / 2,
           }}
         >
           <ChartTitle text="Commissioning S-Curve" />
           <ChartLegend position="bottom" orientation="horizontal" />
+          <ChartValueAxis>
+            <ChartValueAxisItem
+              labels={{
+                content: labelContentAxis,
+                font: "0.7rem Arial, sans-serif",
+              }}
+            />
+          </ChartValueAxis>
           <ChartCategoryAxis>
             <ChartCategoryAxisItem
               categories={chartData.categories}
               startAngle={45}
+              labels={seriesLabels}
             />
           </ChartCategoryAxis>
           <ChartTooltip shared={true} render={tooltipRender} />
@@ -233,22 +395,74 @@ const SCurveChart = () => {
           </ChartSeries>
         </Chart>
       )}
-      {tableData.length > 0 && (
-        <div className="sCurveTable">
+
+      <Grid
+        style={{
+          height: (height - 65 - 20) / 2,
+        }}
+        data={tableData}
+        className="sCurveTable"
+      >
+        <GridColumn field="date" title="구분" footerCell={SimpleSumCell} />
+        <GridColumn
+          field="plan"
+          title="월간 계획"
+          cell={normalcell}
+          footerCell={SimpleSumCell}
+        />
+
+        <GridColumn
+          field="act"
+          title="월간 실적"
+          cell={normalcell}
+          footerCell={SimpleSumCell}
+        />
+        <GridColumn field="diff" title="월간 차이" cell={normalcell} />
+        <GridColumn field="c_plan" title="누적 계획" cell={normalcell} />
+        <GridColumn field="c_act" title="누적 실적" cell={normalcell} />
+        <GridColumn field="c_diff" title="누적 차이" cell={normalcell} />
+      </Grid>
+    </div>
+  );
+};
+
+export default SCurveChart;
+
+const getMonthDifference = (startDate, endDate) => {
+  return (
+    endDate.getMonth() -
+    startDate.getMonth() +
+    12 * (endDate.getFullYear() - startDate.getFullYear())
+  );
+};
+
+/* {tableData.length > 0 && (
+        <div className="sCurveTable" style={{ width: width - 34 }}>
           <div className="sCurveTableHeader">
-            <div className="sCurveTableHeaderItem" style={{ width: "8%" }}>
+            <div
+              className="sCurveTableHeaderItem"
+              style={{ width: tableData.length > 14 ? "100px" : "8%" }}
+            >
               구분
             </div>
             {tableData.map((com, idx) => (
               <div
                 key={idx}
                 className="sCurveTableHeaderItem"
-                style={{ width: 82 / tableData.length + 2 + "%" }}
+                style={{
+                  width:
+                    tableData.length > 14
+                      ? "100px"
+                      : 82 / tableData.length + 2 + "%",
+                }}
               >
                 {com.date}
               </div>
             ))}
-            <div className="sCurveTableHeaderItem" style={{ width: "10%" }}>
+            <div
+              className="sCurveTableHeaderItem"
+              style={{ width: tableData.length > 14 ? "100px" : "10%" }}
+            >
               합계
             </div>
           </div>
@@ -264,7 +478,10 @@ const SCurveChart = () => {
                   >
                     <div
                       className="sCurveTableBodyItem"
-                      style={{ width: "8%", fontWeight: "bold" }}
+                      style={{
+                        width: tableData.length > 14 ? "100px" : "8%",
+                        fontWeight: "bold",
+                      }}
                     >
                       {com.name}
                     </div>
@@ -272,16 +489,28 @@ const SCurveChart = () => {
                       <div
                         key={idx}
                         className="sCurveTableBodyItem"
-                        style={{ width: 82 / tableData.length + 2 + "%" }}
+                        style={{
+                          width:
+                            tableData.length > 14
+                              ? "100px"
+                              : 82 / tableData.length + 2 + "%",
+                          fontWeight: com.field.includes("diff") && "bold",
+                          color: Number(tableContent(com, com1)) < 0 && "red",
+                        }}
                       >
-                        {com1[com.field].toFixed(2)}
+                        {tableContent(com, com1)}
                       </div>
                     ))}
                     <div
                       className="sCurveTableBodyItem"
-                      style={{ width: "10%", fontWeight: "bold" }}
+                      style={{
+                        width: tableData.length > 14 ? "100px" : "10%",
+                        fontWeight: "bold",
+                      }}
                     >
-                      {com.field === "plan"
+                      {com.field.includes("diff")
+                        ? "-"
+                        : com.field === "plan"
                         ? tableData[tableData.length - 1]["c_plan"].toFixed(2)
                         : com.field === "act"
                         ? tableData
@@ -297,17 +526,4 @@ const SCurveChart = () => {
             })}
           </div>
         </div>
-      )}
-    </div>
-  );
-};
-
-export default SCurveChart;
-
-const getMonthDifference = (startDate, endDate) => {
-  return (
-    endDate.getMonth() -
-    startDate.getMonth() +
-    12 * (endDate.getFullYear() - startDate.getFullYear())
-  );
-};
+      )} */

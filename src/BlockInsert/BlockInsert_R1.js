@@ -37,6 +37,14 @@ const BlockInsert = () => {
 
   const diagramRef = useRef();
 
+  useEffect(() => {
+    document.addEventListener("keydown", function (event) {
+      console.log(
+        `Key: ${event.key} with keycode ${event.keyCode} has been pressed`
+      );
+    });
+  });
+
   const useConfirm = (message = null, onConfirm, onCancel) => {
     if (!onConfirm || typeof onConfirm !== "function") {
       return;
@@ -108,8 +116,6 @@ const BlockInsert = () => {
     const $ = go.GraphObject.make;
 
     const myDiagram = $(go.Diagram, {
-      allowCopy: false,
-      // allowZoom: false,
       "undoManager.isEnabled": true, // enable undo & redo
       initialDocumentSpot: go.Spot.Top,
       initialViewportSpot: go.Spot.Top,
@@ -127,6 +133,8 @@ const BlockInsert = () => {
 
       if (e.key === "Backspace") {
         confirmDelete();
+        return;
+      } else {
         return;
       }
     };
@@ -182,16 +190,17 @@ const BlockInsert = () => {
       });
     }
 
+    var mainItemFill = "#F8BBD0";
+
+    var normalItemFill = "white";
+
+    var steamItemFill = "#B3E5FC";
+
     const goToLink = function (e, button) {
       var node = button.part.adornedPart;
 
       if (node.data.uuu_bp_record_url !== null) {
-        // window.open("about:_blank").location.href = node.data.uuu_bp_record_url;
-        window.open(
-          node.data.uuu_bp_record_url,
-          "_blank",
-          "toolbar=0,location=0,menubar=0"
-        );
+        window.open("about:blank").location.href = node.data.uuu_bp_record_url;
       }
     };
 
@@ -222,8 +231,13 @@ const BlockInsert = () => {
       diagram.commandHandler.doKeyDown = function () {
         var e = myDiagram.lastInput;
 
+        if (e.control) return;
+
         if (e.key === "Backspace") {
           confirmDelete();
+          return;
+        } else {
+          return;
         }
       };
     };
@@ -260,7 +274,7 @@ const BlockInsert = () => {
     );
 
     myDiagram.nodeTemplateMap.add(
-      "Low", // the default category
+      "High", // the default category
       $(
         go.Node,
         "Vertical",
@@ -268,19 +282,17 @@ const BlockInsert = () => {
         go.Panel.Auto,
         nodeStyle(),
         { click: clickEvent },
-        {
-          defaultRowSeparatorStroke: "gray",
-          defaultColumnSeparatorStroke: "gray",
-        },
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
+
         $(
           go.Shape,
           "RoundedRectangle",
           {
-            fill: "white",
-            strokeWidth: 2,
+            fill: mainItemFill,
           },
-          new go.Binding("stroke", "commBlockBorderColorSPD").makeTwoWay(),
+          new go.Binding("stroke", "isHighlighted", function (h) {
+            return h ? "green" : "black";
+          }).ofObject(),
           new go.Binding("strokeWidth", "isHighlighted", function (h) {
             return h ? 4 : 2;
           }).ofObject()
@@ -289,16 +301,12 @@ const BlockInsert = () => {
         $(
           go.Panel,
           "Table",
-          $(
-            go.RowColumnDefinition,
-            {
-              row: 0,
-              separatorStroke: "black",
-              background: "white",
-              coversSeparators: true,
-            },
-            new go.Binding("background", "commBlockTitleColorSPD").makeTwoWay()
-          ),
+          $(go.RowColumnDefinition, {
+            row: 0,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
           $(go.RowColumnDefinition, {
             row: 1,
             separatorStroke: "black",
@@ -311,47 +319,29 @@ const BlockInsert = () => {
             background: "white",
             coversSeparators: true,
           }),
-          $(
-            go.RowColumnDefinition,
-            {
-              row: 3,
-              separatorStroke: "black",
-              coversSeparators: false,
-            },
-            new go.Binding("background", "commBlockColorSPD").makeTwoWay()
-          ),
+          $(go.RowColumnDefinition, {
+            row: 3,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
 
-          $(
-            go.RowColumnDefinition,
-            {
-              row: 4,
-              coversSeparators: false,
-            },
-            new go.Binding("background", "commBlockColorSPD").makeTwoWay()
-          ),
+          $(go.RowColumnDefinition, {
+            row: 3,
+            column: 1,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
           $(go.RowColumnDefinition, {
             row: 5,
             separatorStroke: "black",
             background: "white",
             coversSeparators: true,
           }),
-          $(
-            go.RowColumnDefinition,
-            {
-              row: 6,
-              separatorStroke: "black",
-              coversSeparators: false,
-            },
-            new go.Binding("background", "commBlockColorSPD").makeTwoWay()
-          ),
-          $(
-            go.RowColumnDefinition,
-            {
-              row: 7,
-              coversSeparators: false,
-            },
-            new go.Binding("background", "commBlockColorSPD").makeTwoWay()
-          ),
+          $(go.RowColumnDefinition, {
+            row: 6,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
           $(go.RowColumnDefinition, {
             row: 8,
             separatorStroke: "black",
@@ -375,7 +365,7 @@ const BlockInsert = () => {
             coversSeparators: true,
           }),
 
-          $(go.TextBlock, new go.Binding("text", "commCardNoDA").makeTwoWay(), {
+          $(go.TextBlock, new go.Binding("text", "key").makeTwoWay(), {
             editable: true,
             row: 0,
             column: 0,
@@ -385,7 +375,7 @@ const BlockInsert = () => {
             height: 25,
             verticalAlignment: go.Spot.Left,
             textAlign: "center",
-            font: "bold 18px sans-serif",
+            font: "bold 13px sans-serif",
           }),
 
           $(
@@ -401,7 +391,7 @@ const BlockInsert = () => {
               height: 75,
               verticalAlignment: go.Spot.Left,
               textAlign: "center",
-              font: "bold 24px sans-serif",
+              font: "bold 13px sans-serif",
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
@@ -412,7 +402,7 @@ const BlockInsert = () => {
             columnSpan: 3,
             margin: 5,
             textAlign: "center",
-            font: "bold 18px sans-serif",
+            font: "bold 13px sans-serif",
           }),
           $(
             go.TextBlock,
@@ -426,7 +416,6 @@ const BlockInsert = () => {
               width: 125,
               margin: 5,
               textAlign: "center",
-              font: "bold 18px sans-serif",
             }
           ),
           $(
@@ -441,7 +430,6 @@ const BlockInsert = () => {
               width: 125,
               margin: 5,
               textAlign: "center",
-              font: "bold 18px sans-serif",
             }
           ),
           $(
@@ -455,7 +443,6 @@ const BlockInsert = () => {
               width: 50,
               margin: 5,
               textAlign: "center",
-              font: "bold 18px sans-serif",
             }
           ),
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
@@ -465,7 +452,7 @@ const BlockInsert = () => {
             columnSpan: 3,
             margin: 5,
             textAlign: "center",
-            font: "bold 18px sans-serif",
+            font: "bold 13px sans-serif",
           }),
           $(
             go.TextBlock,
@@ -479,7 +466,6 @@ const BlockInsert = () => {
               width: 125,
               margin: 5,
               textAlign: "center",
-              font: "bold 18px sans-serif",
             }
           ),
           $(
@@ -494,7 +480,6 @@ const BlockInsert = () => {
               width: 125,
               margin: 5,
               textAlign: "center",
-              font: "bold 18px sans-serif",
             }
           ),
           $(
@@ -508,7 +493,6 @@ const BlockInsert = () => {
               width: 50,
               margin: 5,
               textAlign: "center",
-              font: "bold 18px sans-serif",
             }
           ),
           $(
@@ -523,7 +507,504 @@ const BlockInsert = () => {
               height: 50,
               verticalAlignment: go.Spot.Left,
               textAlign: "center",
-              font: "bold 18px sans-serif",
+              font: "bold 13px sans-serif",
+            }
+          )
+        ),
+        // four named ports, one on each side:
+        makePort("T", go.Spot.Top, go.Spot.TopSide, true, true),
+        makePort("L", go.Spot.Left, go.Spot.LeftSide, true, true),
+        makePort("R", go.Spot.Right, go.Spot.RightSide, true, true),
+        makePort("B", go.Spot.Bottom, go.Spot.BottomSide, true, true)
+      )
+    );
+
+    myDiagram.nodeTemplateMap.add(
+      "Medium", // the default category
+      $(
+        go.Node,
+        "Vertical",
+        { selectionAdornmentTemplate: defaultAdornment },
+
+        go.Panel.Auto,
+        nodeStyle(),
+        { click: clickEvent },
+        // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
+
+        $(
+          go.Shape,
+          "RoundedRectangle",
+          {
+            fill: steamItemFill,
+            stroke: "black",
+            strokeWidth: 2,
+          },
+          new go.Binding("stroke", "isHighlighted", function (h) {
+            return h ? "green" : "black";
+          }).ofObject(),
+          new go.Binding("strokeWidth", "isHighlighted", function (h) {
+            return h ? 4 : 2;
+          }).ofObject()
+        ),
+        new go.Binding("figure", "figure"),
+
+        $(
+          go.Panel,
+          "Table",
+          $(go.RowColumnDefinition, {
+            row: 0,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 1,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 2,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 3,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+
+          $(go.RowColumnDefinition, {
+            row: 3,
+            column: 1,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 5,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 6,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 8,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            column: 0,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            column: 1,
+            separatorStroke: "black",
+
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            column: 2,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+
+          $(go.TextBlock, new go.Binding("text", "key").makeTwoWay(), {
+            editable: true,
+            row: 0,
+            column: 0,
+            columnSpan: 3,
+            margin: 5,
+            width: 175,
+            height: 25,
+            verticalAlignment: go.Spot.Left,
+            textAlign: "center",
+            font: "bold 13px sans-serif",
+          }),
+
+          $(
+            go.TextBlock,
+            new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
+            {
+              editable: true,
+              row: 1,
+              column: 0,
+              columnSpan: 3,
+              margin: 5,
+              width: 175,
+              height: 75,
+              verticalAlignment: go.Spot.Left,
+              textAlign: "center",
+              font: "bold 13px sans-serif",
+            }
+          ),
+          $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
+            editable: true,
+
+            row: 2,
+            column: 0,
+            columnSpan: 3,
+            margin: 5,
+            textAlign: "center",
+            font: "bold 13px sans-serif",
+          }),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 3,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 4,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
+            {
+              editable: true,
+              row: 3,
+              rowSpan: 2,
+              column: 2,
+              width: 50,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
+            editable: true,
+            row: 5,
+            column: 0,
+            columnSpan: 3,
+            margin: 5,
+            textAlign: "center",
+            font: "bold 13px sans-serif",
+          }),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 6,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 7,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
+            {
+              editable: true,
+              row: 6,
+              rowSpan: 2,
+              column: 2,
+              width: 50,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "commSeqLogicText").makeTwoWay(),
+            {
+              editable: true,
+              row: 8,
+              column: 0,
+              columnSpan: 3,
+              margin: 5,
+              height: 50,
+              verticalAlignment: go.Spot.Left,
+              textAlign: "center",
+              font: "bold 13px sans-serif",
+            }
+          )
+        ),
+        // four named ports, one on each side:
+        makePort("T", go.Spot.Top, go.Spot.TopSide, true, true),
+        makePort("L", go.Spot.Left, go.Spot.LeftSide, true, true),
+        makePort("R", go.Spot.Right, go.Spot.RightSide, true, true),
+        makePort("B", go.Spot.Bottom, go.Spot.BottomSide, true, true)
+      )
+    );
+
+    myDiagram.nodeTemplateMap.add(
+      "Low", // the default category
+      $(
+        go.Node,
+        "Vertical",
+        { selectionAdornmentTemplate: defaultAdornment },
+        go.Panel.Auto,
+        nodeStyle(),
+        { click: clickEvent },
+        // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
+        $(
+          go.Shape,
+          "RoundedRectangle",
+          {
+            fill: normalItemFill,
+            stroke: "black",
+            strokeWidth: 2,
+          },
+          new go.Binding("stroke", "isHighlighted", function (h) {
+            return h ? "green" : "black";
+          }).ofObject(),
+          new go.Binding("strokeWidth", "isHighlighted", function (h) {
+            return h ? 4 : 2;
+          }).ofObject()
+        ),
+        new go.Binding("figure", "figure"),
+        $(
+          go.Panel,
+          "Table",
+          $(go.RowColumnDefinition, {
+            row: 0,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 1,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 2,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 3,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+
+          $(go.RowColumnDefinition, {
+            row: 3,
+            column: 1,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 5,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 6,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            row: 8,
+            separatorStroke: "black",
+            background: "white",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            column: 0,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            column: 1,
+            separatorStroke: "black",
+
+            coversSeparators: true,
+          }),
+          $(go.RowColumnDefinition, {
+            column: 2,
+            separatorStroke: "black",
+            coversSeparators: true,
+          }),
+
+          $(go.TextBlock, new go.Binding("text", "key").makeTwoWay(), {
+            editable: true,
+            row: 0,
+            column: 0,
+            columnSpan: 3,
+            margin: 5,
+            width: 175,
+            height: 25,
+            verticalAlignment: go.Spot.Left,
+            textAlign: "center",
+            font: "bold 13px sans-serif",
+          }),
+
+          $(
+            go.TextBlock,
+            new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
+            {
+              editable: true,
+              row: 1,
+              column: 0,
+              columnSpan: 3,
+              margin: 5,
+              width: 175,
+              height: 75,
+              verticalAlignment: go.Spot.Left,
+              textAlign: "center",
+              font: "bold 13px sans-serif",
+            }
+          ),
+          $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
+            editable: true,
+
+            row: 2,
+            column: 0,
+            columnSpan: 3,
+            margin: 5,
+            textAlign: "center",
+            font: "bold 13px sans-serif",
+          }),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 3,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 4,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
+            {
+              editable: true,
+              row: 3,
+              rowSpan: 2,
+              column: 2,
+              width: 50,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
+            editable: true,
+            row: 5,
+            column: 0,
+            columnSpan: 3,
+            margin: 5,
+            textAlign: "center",
+            font: "bold 13px sans-serif",
+          }),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 6,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 7,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
+            {
+              editable: true,
+              row: 6,
+              rowSpan: 2,
+              column: 2,
+              width: 50,
+              margin: 5,
+              textAlign: "center",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "commSeqLogicText").makeTwoWay(),
+            {
+              editable: true,
+              row: 8,
+              column: 0,
+              columnSpan: 3,
+              margin: 5,
+              height: 50,
+              verticalAlignment: go.Spot.Left,
+              textAlign: "center",
+              font: "bold 13px sans-serif",
             }
           )
         ),
@@ -596,7 +1077,7 @@ const BlockInsert = () => {
 
       $(
         go.Shape, // the arrowhead
-        { toArrow: "standard", strokeWidth: 5, fill: "gray" }
+        { toArrow: "standard", strokeWidth: 0, fill: "gray" }
       ),
       $(
         go.Panel,
@@ -612,6 +1093,17 @@ const BlockInsert = () => {
           go.Shape,
           "RoundedRectangle", // the label shape
           { fill: "#F8F8F8", strokeWidth: 0 }
+        ),
+        $(
+          go.TextBlock,
+          "Yes", // the label
+          {
+            textAlign: "center",
+            font: "10pt helvetica, arial, sans-serif",
+            stroke: "#333333",
+            editable: true,
+          },
+          new go.Binding("text").makeTwoWay()
         )
       )
     );
@@ -661,7 +1153,7 @@ const BlockInsert = () => {
             baseSet.nodeDataArray.push({
               key: com.uuu_P6ActivityId,
               uuu_P6ActivityId: com.uuu_P6ActivityId,
-              category: "Low",
+              category: com.dtsPrioritySPD,
               uuu_P6ActivityName: com.uuu_P6ActivityName,
               planDate: "Plan Date",
               ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
@@ -687,25 +1179,12 @@ const BlockInsert = () => {
               commSeqLogicText: com.commSeqLogicText,
               loc: com.dtsDashCoordinates,
               record_no: com.record_no,
-              commBlockTitleColorSPD:
-                com.commBlockTitleColorSPD === null
-                  ? "white"
-                  : handleColor("title", com.commBlockTitleColorSPD),
-              commBlockColorSPD:
-                com.commBlockColorSPD === null
-                  ? "white"
-                  : handleColor("block", com.commBlockColorSPD),
-              commBlockBorderColorSPD:
-                com.commBlockBorderColorSPD === null
-                  ? "black"
-                  : handleColor("border", com.commBlockBorderColorSPD),
-              commCardNoDA: com.commCardNoDA,
             });
           } else {
             baseSet.nodeDataArray.push({
               key: com.uuu_P6ActivityId,
               uuu_P6ActivityId: com.uuu_P6ActivityId,
-              category: "Low",
+              category: com.dtsPrioritySPD,
               uuu_P6ActivityName: com.uuu_P6ActivityName,
               planDate: "Plan Date",
               ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
@@ -730,19 +1209,6 @@ const BlockInsert = () => {
               uuu_bp_record_url: com.uuu_bp_record_url,
               commSeqLogicText: com.commSeqLogicText,
               record_no: com.record_no,
-              commBlockTitleColorSPD:
-                com.commBlockTitleColorSPD === null
-                  ? "white"
-                  : handleColor("title", com.commBlockTitleColorSPD),
-              commBlockColorSPD:
-                com.commBlockColorSPD === null
-                  ? "white"
-                  : handleColor("block", com.commBlockColorSPD),
-              commBlockBorderColorSPD:
-                com.commBlockBorderColorSPD === null
-                  ? "black"
-                  : handleColor("border", com.commBlockBorderColorSPD),
-              commCardNoDA: com.commCardNoDA,
             });
           }
         }
@@ -753,21 +1219,17 @@ const BlockInsert = () => {
           if (com._bp_lineitems !== undefined) {
             if (com._bp_lineitems.length > 0) {
               com._bp_lineitems.forEach((com2) => {
-                if (
-                  com2.uuu_tab_id === "Relationship" &&
-                  com2.dtsPredSuccSRB === "Successor"
-                )
-                  baseSet.linkDataArray.push({
-                    from: com.uuu_P6ActivityId,
-                    to: com2.dtsCommActivityBPK,
-                    points:
-                      com2.dtsDashCoordinates !== null
-                        ? com2.dtsDashCoordinates
-                            .split(",")
-                            .map((com) => Number(com))
-                        : null,
-                    dtsLineAutoSeq: com2.dtsLineAutoSeq,
-                  });
+                baseSet.linkDataArray.push({
+                  from: com.uuu_P6ActivityId,
+                  to: com2.dtsCommActivityBPK,
+                  points:
+                    com2.dtsDashCoordinates !== null
+                      ? com2.dtsDashCoordinates
+                          .split(",")
+                          .map((com) => Number(com))
+                      : null,
+                  dtsLineAutoSeq: com2.dtsLineAutoSeq,
+                });
               });
             }
           }
@@ -819,13 +1281,6 @@ const BlockInsert = () => {
           key: value.toUpperCase(),
         };
       });
-    } else if (name === "commCardNoDA") {
-      setInsertData((prev) => {
-        return {
-          ...prev,
-          commCardNoDA: value,
-        };
-      });
     } else if (name === "category") {
       if (value === "Turn-Over Package") {
         setInsertDataToogle(false);
@@ -857,6 +1312,9 @@ const BlockInsert = () => {
       insertData.record_no = checkItem.record_no;
     }
 
+    if (insertData.category === "Top") {
+    }
+
     const diagram = diagramRef.current?.getDiagram();
 
     const insertNodeData = JSON.parse(diagram.model.toJson());
@@ -882,14 +1340,13 @@ const BlockInsert = () => {
 
   const finalDataSave = async () => {
     setProgressVisibleDialog(true);
+    const diagram = await diagramRef.current?.getDiagram();
 
-    const diagram = diagramRef.current?.getDiagram();
-
-    const insertNodeData = JSON.parse(diagram.model.toJson());
+    const insertNodeData = await JSON.parse(diagram.model.toJson());
 
     let comData = [];
 
-    insertNodeData.nodeDataArray.forEach((com) => {
+    await insertNodeData.nodeDataArray.forEach((com) => {
       comData.push({
         uuu_P6ActivityId: com.key,
         uuu_P6ActivityName: com.uuu_P6ActivityName,
@@ -934,108 +1391,41 @@ const BlockInsert = () => {
         dtsPrioritySPD: com.category,
         record_no: com.record_no,
         commSeqLogicText: com.commSeqLogicText,
-        commCardNoDA: com.commCardNoDA,
         _bp_lineitems: [],
       });
     });
 
-    comData.forEach((com) => {
+    await comData.forEach((com) => {
       insertNodeData.linkDataArray.forEach((com2) => {
         if (com.uuu_P6ActivityId === com2.from) {
-          com._bp_lineitems.push({
-            dtsPredSuccSRB: "Successor",
-            dtsCommActivityBPK: com2.to,
-            dtsDashCoordinates: com2.points.join(),
-            uuu_P6ActivityName: insertNodeData.nodeDataArray.filter((com3) => {
-              return com3.key === com2.to;
-            })[0]["uuu_P6ActivityName"],
-            dtsLineAutoSeq:
-              com2.dtsLineAutoSeq !== undefined
-                ? com2.dtsLineAutoSeq
-                : String(Math.round(Math.random() * 1000000000000)),
-            short_desc: "1",
-          });
-        } else if (com.uuu_P6ActivityId === com2.to) {
-          com._bp_lineitems.push({
-            dtsPredSuccSRB: "Predecessor",
-            dtsCommActivityBPK: com2.from,
-            dtsDashCoordinates: com2.points.join(),
-            uuu_P6ActivityName: insertNodeData.nodeDataArray.filter((com3) => {
-              return com3.key === com2.from;
-            })[0]["uuu_P6ActivityName"],
-            dtsLineAutoSeq:
-              com2.dtsLineAutoSeq !== undefined
-                ? com2.dtsLineAutoSeq
-                : String(Math.round(Math.random() * 1000000000000)),
-            short_desc: "1",
-          });
+          if (com2.dtsLineAutoSeq !== undefined) {
+            com._bp_lineitems.push({
+              dtsCommActivityBPK: com2.to,
+              dtsDashCoordinates: com2.points.join(),
+              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
+                (com3) => {
+                  return com3.key === com2.to;
+                }
+              )[0]["uuu_P6ActivityName"],
+              dtsLineAutoSeq: com2.dtsLineAutoSeq,
+              short_desc: "1",
+            });
+          } else {
+            com._bp_lineitems.push({
+              dtsCommActivityBPK: com2.to,
+              dtsDashCoordinates: com2.points.join(),
+              uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
+                (com3) => {
+                  return com3.key === com2.to;
+                }
+              )[0]["uuu_P6ActivityName"],
+              dtsLineAutoSeq: String(Math.round(Math.random() * 1000000000000)),
+              short_desc: "1",
+            });
+          }
         }
       });
     });
-
-    console.log(comData);
-
-    // comData.forEach((com) => {
-    //   insertNodeData.linkDataArray.forEach((com2) => {
-    //     if (com.uuu_P6ActivityId === com2.from) {
-    //       if (com2.dtsLineAutoSeq !== undefined) {
-    //         com._bp_lineitems.push({
-    //           dtsPredSuccSRB: "Successor",
-    //           dtsCommActivityBPK: com2.to,
-    //           dtsDashCoordinates: com2.points.join(),
-    //           uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
-    //             (com3) => {
-    //               return com3.key === com2.to;
-    //             }
-    //           )[0]["uuu_P6ActivityName"],
-    //           dtsLineAutoSeq: com2.dtsLineAutoSeq,
-    //           short_desc: "1",
-    //         });
-    //       } else {
-    //         com._bp_lineitems.push({
-    //           dtsPredSuccSRB: "Successor",
-    //           dtsCommActivityBPK: com2.to,
-    //           dtsDashCoordinates: com2.points.join(),
-    //           uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
-    //             (com3) => {
-    //               return com3.key === com2.to;
-    //             }
-    //           )[0]["uuu_P6ActivityName"],
-    //           dtsLineAutoSeq: String(Math.round(Math.random() * 1000000000000)),
-    //           short_desc: "1",
-    //         });
-    //       }
-    //     } else {
-    //       if (com2.dtsLineAutoSeq !== undefined) {
-    //         com._bp_lineitems.push({
-    //           dtsPredSuccSRB: "Predecessor",
-    //           dtsCommActivityBPK: com2.to,
-    //           dtsDashCoordinates: com2.points.join(),
-    //           uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
-    //             (com3) => {
-    //               return com3.key === com2.to;
-    //             }
-    //           )[0]["uuu_P6ActivityName"],
-    //           dtsLineAutoSeq: com2.dtsLineAutoSeq,
-    //           short_desc: "1",
-    //         });
-    //       } else {
-    //         com._bp_lineitems.push({
-    //           dtsPredSuccSRB: "Predecessor",
-    //           dtsCommActivityBPK: com2.to,
-    //           dtsDashCoordinates: com2.points.join(),
-    //           uuu_P6ActivityName: insertNodeData.nodeDataArray.filter(
-    //             (com3) => {
-    //               return com3.key === com2.to;
-    //             }
-    //           )[0]["uuu_P6ActivityName"],
-    //           dtsLineAutoSeq: String(Math.round(Math.random() * 1000000000000)),
-    //           short_desc: "1",
-    //         });
-    //       }
-    //     }
-    //   });
-    // });
 
     const noneDeleteItem = await insertNodeData.nodeDataArray.map((com) => {
       return com.key;
@@ -1286,6 +1676,20 @@ const BlockInsert = () => {
         {visibleDialog && (
           <Dialog title={"Card Add"} onClose={toggleDialog}>
             <div className="blockInsertModal">
+              <select
+                name="category"
+                defaultValue="Commissioning Low"
+                onChange={handleInsertData}
+                className="blockInsertModalSelect"
+              >
+                <option value="" disabled>
+                  Card를 선택해주세요
+                </option>
+                <option>Commissioning High</option>
+                <option>Commissioning Medium</option>
+                <option>Commissioning Low</option>
+              </select>
+
               <ComCardInsert
                 insertData={insertData}
                 setInsertData={setInsertData}
@@ -1417,7 +1821,6 @@ const baseInsertComData = {
   uuu_P6ActualDuration: 0,
   commSeqLogicText: "",
   record_no: "",
-  commCardNoDA: 0,
 };
 
 //TextEditor
@@ -1605,28 +2008,3 @@ const baseInsertComData = {
 
   window.TextEditor = TextEditor;
 })(window);
-
-const colorList = [
-  { name: "RED", color: "rgb(255, 50, 0)" },
-  { name: "GREEN", color: "rgb(0, 200, 100)" },
-  { name: "BLUE", color: "rgb(100, 150, 250)" },
-  { name: "ORANGE", color: "rgb(255, 200, 0)" },
-  { name: "PINK", color: "rgb(255, 230, 220)" },
-  { name: "YELLOW", color: "rgb(255, 255, 200)" },
-  { name: "BLACK", color: "rgb(0, 0, 0)" },
-  { name: "WHITE", color: "rgb(255, 255, 255)" },
-];
-
-const handleColor = (type, colorName) => {
-  const color_result = colorList.find((com) => com.name === colorName);
-
-  if (type === "border") {
-    return color_result?.["color"] === undefined
-      ? "black"
-      : color_result?.["color"];
-  } else {
-    return color_result?.["color"] === undefined
-      ? "white"
-      : color_result?.["color"];
-  }
-};

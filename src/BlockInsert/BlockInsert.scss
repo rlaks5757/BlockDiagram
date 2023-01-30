@@ -2,10 +2,9 @@
   position: relative;
   display: flex;
   // flex-wrap: wrap;
-  width: 100%;
-  height: 700px;
 
   .diagram-component {
+    padding: 5px;
     width: 100%;
     height: 100%;
     flex-grow: 1;
@@ -17,8 +16,8 @@
     position: absolute;
     right: 0;
     top: 0;
-    width: 150px;
-    height: 100px;
+    width: 25%;
+    height: 20%;
     background-color: aliceblue;
     border: 1px solid black;
   }

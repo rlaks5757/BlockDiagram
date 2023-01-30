@@ -1,23 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import * as go from "gojs";
 import { ReactDiagram, ReactOverview } from "gojs-react";
+import * as go from "gojs";
 import moment from "moment";
 import Url from "../url/fetchURL";
+import useViewPort from "../Hooks/useViewPort";
 import "./BlockView.scss";
-
 import axios from "axios";
 
 const BlockView = () => {
+  const { width, height } = useViewPort();
   const params = useParams();
 
   const [loadModelData, setLoadModelData] = useState(false);
-
-  const [modelData, setModalDate] = useState({
-    class: "GraphLinksModel",
-    nodeDataArray: [],
-    linkDataArray: [],
-  });
 
   const diagramRef = useRef();
 
@@ -25,6 +20,10 @@ const BlockView = () => {
     const $ = go.GraphObject.make;
 
     const myDiagram = $(go.Diagram, {
+      allowCopy: false,
+      allowDelete: false,
+      allowMove: false,
+      allowDragOut: false,
       "undoManager.isEnabled": true, // enable undo & redo
       initialDocumentSpot: go.Spot.Top,
       initialViewportSpot: go.Spot.Top,
@@ -88,11 +87,18 @@ const BlockView = () => {
       });
     }
 
-    var mainItemFill = "#F8BBD0";
+    const goToLink = function (e, button) {
+      var node = button.part.adornedPart;
 
-    var normalItemFill = "white";
-
-    var steamItemFill = "#B3E5FC";
+      if (node.data.uuu_bp_record_url !== null) {
+        // window.open("about:_blank").location.href = node.data.uuu_bp_record_url;
+        window.open(
+          node.data.uuu_bp_record_url,
+          "_blank",
+          "toolbar=0,location=0,menubar=0"
+        );
+      }
+    };
 
     const clickEvent = function (e, node) {
       // highlight all Links and Nodes coming out of a given Node
@@ -117,17 +123,6 @@ const BlockView = () => {
         n.isHighlighted = true;
       });
       diagram.commitTransaction("highlight");
-      handleNodeClick(node.data);
-    };
-
-    const linkClickEvent = (e, node) => {
-      myDiagram.commandHandler.doKeyDown = function () {
-        var ekey = myDiagram.lastInput;
-
-        if (ekey.key === "Backspace") {
-          e.diagram.commandHandler.deleteSelection();
-        }
-      };
     };
 
     var defaultAdornment = $(
@@ -143,6 +138,7 @@ const BlockView = () => {
       $(
         "Button",
         {
+          click: goToLink,
           alignment: go.Spot.TopRight,
         }, // this function is defined below
         new go.Binding("visible", "", (a) => !a.diagram.isReadOnly).ofObject(),
@@ -151,7 +147,7 @@ const BlockView = () => {
     );
 
     myDiagram.nodeTemplateMap.add(
-      "High", // the default category
+      "Low", // the default category
       $(
         go.Node,
         "Vertical",
@@ -159,17 +155,19 @@ const BlockView = () => {
         go.Panel.Auto,
         nodeStyle(),
         { click: clickEvent },
+        {
+          defaultRowSeparatorStroke: "gray",
+          defaultColumnSeparatorStroke: "gray",
+        },
         // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
-
         $(
           go.Shape,
           "RoundedRectangle",
           {
-            fill: mainItemFill,
+            fill: "white",
+            strokeWidth: 2,
           },
-          new go.Binding("stroke", "isHighlighted", function (h) {
-            return h ? "green" : "black";
-          }).ofObject(),
+          new go.Binding("stroke", "commBlockBorderColorSPD").makeTwoWay(),
           new go.Binding("strokeWidth", "isHighlighted", function (h) {
             return h ? 4 : 2;
           }).ofObject()
@@ -178,12 +176,16 @@ const BlockView = () => {
         $(
           go.Panel,
           "Table",
-          $(go.RowColumnDefinition, {
-            row: 0,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
+          $(
+            go.RowColumnDefinition,
+            {
+              row: 0,
+              separatorStroke: "black",
+              background: "white",
+              coversSeparators: true,
+            },
+            new go.Binding("background", "commBlockTitleColorSPD").makeTwoWay()
+          ),
           $(go.RowColumnDefinition, {
             row: 1,
             separatorStroke: "black",
@@ -193,24 +195,54 @@ const BlockView = () => {
           $(go.RowColumnDefinition, {
             row: 2,
             separatorStroke: "black",
+            background: "white",
             coversSeparators: true,
           }),
+          $(
+            go.RowColumnDefinition,
+            {
+              row: 3,
+              separatorStroke: "black",
+              coversSeparators: false,
+            },
+            new go.Binding("background", "commBlockColorSPD").makeTwoWay()
+          ),
 
+          $(
+            go.RowColumnDefinition,
+            {
+              row: 4,
+              coversSeparators: false,
+            },
+            new go.Binding("background", "commBlockColorSPD").makeTwoWay()
+          ),
           $(go.RowColumnDefinition, {
-            row: 2,
-            column: 1,
-            separatorStroke: "black",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            row: 4,
+            row: 5,
             separatorStroke: "black",
             background: "white",
             coversSeparators: true,
           }),
+          $(
+            go.RowColumnDefinition,
+            {
+              row: 6,
+              separatorStroke: "black",
+              coversSeparators: false,
+            },
+            new go.Binding("background", "commBlockColorSPD").makeTwoWay()
+          ),
+          $(
+            go.RowColumnDefinition,
+            {
+              row: 7,
+              coversSeparators: false,
+            },
+            new go.Binding("background", "commBlockColorSPD").makeTwoWay()
+          ),
           $(go.RowColumnDefinition, {
-            row: 5,
+            row: 8,
             separatorStroke: "black",
+            background: "white",
             coversSeparators: true,
           }),
           $(go.RowColumnDefinition, {
@@ -230,655 +262,161 @@ const BlockView = () => {
             coversSeparators: true,
           }),
 
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
-            {
-              editable: false,
-              row: 0,
-              column: 0,
-              columnSpan: 3,
-              margin: 5,
-              width: 125,
-              height: 75,
-              verticalAlignment: go.Spot.Left,
-              textAlign: "center",
-              font: "bold 13px sans-serif",
-            }
-          ),
-          $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: false,
-
-            row: 1,
-            column: 0,
-            columnSpan: 3,
-            margin: 5,
-            textAlign: "center",
-            font: "bold 13px sans-serif",
-          }),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 2,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 3,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
-            {
-              editable: false,
-              row: 2,
-              rowSpan: 2,
-              column: 2,
-              width: 25,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: false,
-            row: 4,
-            column: 0,
-            columnSpan: 3,
-            margin: 5,
-            textAlign: "center",
-            font: "bold 13px sans-serif",
-          }),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 5,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 6,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
-            {
-              editable: false,
-              row: 5,
-              rowSpan: 2,
-              column: 2,
-              width: 25,
-              margin: 5,
-              textAlign: "center",
-            }
-          )
-        ),
-        // four named ports, one on each side:
-        makePort("T", go.Spot.Top, go.Spot.TopSide, true, true),
-        makePort("L", go.Spot.Left, go.Spot.LeftSide, true, true),
-        makePort("R", go.Spot.Right, go.Spot.RightSide, true, true),
-        makePort("B", go.Spot.Bottom, go.Spot.BottomSide, true, true)
-      )
-    );
-
-    myDiagram.nodeTemplateMap.add(
-      "Medium", // the default category
-      $(
-        go.Node,
-        go.Panel.Auto,
-        nodeStyle(),
-        { click: clickEvent },
-        // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
-
-        $(
-          go.Shape,
-          "RoundedRectangle",
-          {
-            fill: steamItemFill,
-            stroke: "black",
-            strokeWidth: 2,
-          },
-          new go.Binding("stroke", "isHighlighted", function (h) {
-            return h ? "green" : "black";
-          }).ofObject(),
-          new go.Binding("strokeWidth", "isHighlighted", function (h) {
-            return h ? 4 : 2;
-          }).ofObject()
-        ),
-        new go.Binding("figure", "figure"),
-
-        $(
-          go.Panel,
-          "Table",
-          $(go.RowColumnDefinition, {
-            row: 0,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            row: 1,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            row: 2,
-            separatorStroke: "black",
-            coversSeparators: true,
-          }),
-
-          $(go.RowColumnDefinition, {
-            row: 2,
-            column: 1,
-            separatorStroke: "black",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            row: 4,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            row: 5,
-            separatorStroke: "black",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            column: 0,
-            separatorStroke: "black",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            column: 1,
-            separatorStroke: "black",
-
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            column: 2,
-            separatorStroke: "black",
-            coversSeparators: true,
-          }),
-
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
-            {
-              editable: false,
-
-              row: 0,
-              column: 0,
-              columnSpan: 3,
-              margin: 5,
-              width: 125,
-              height: 75,
-              verticalAlignment: go.Spot.Left,
-              textAlign: "center",
-              font: "bold 13px sans-serif",
-            }
-          ),
-          $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: false,
-
-            row: 1,
-            column: 0,
-            columnSpan: 3,
-            margin: 5,
-            textAlign: "center",
-            font: "bold 13px sans-serif",
-          }),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 2,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 3,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
-            {
-              editable: false,
-              row: 2,
-              rowSpan: 2,
-              column: 2,
-              width: 25,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: false,
-            row: 4,
-            column: 0,
-            columnSpan: 3,
-            margin: 5,
-            textAlign: "center",
-            font: "bold 13px sans-serif",
-          }),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 5,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 6,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
-            {
-              editable: false,
-              row: 5,
-              rowSpan: 2,
-              column: 2,
-              width: 25,
-              margin: 5,
-              textAlign: "center",
-            }
-          )
-        ),
-        // four named ports, one on each side:
-        makePort("T", go.Spot.Top, go.Spot.TopSide, true, true),
-        makePort("L", go.Spot.Left, go.Spot.LeftSide, true, true),
-        makePort("R", go.Spot.Right, go.Spot.RightSide, true, true),
-        makePort("B", go.Spot.Bottom, go.Spot.BottomSide, true, true)
-      )
-    );
-
-    myDiagram.nodeTemplateMap.add(
-      "Low", // the default category
-      $(
-        go.Node,
-        go.Panel.Auto,
-        nodeStyle(),
-        { click: clickEvent },
-        // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
-
-        $(
-          go.Shape,
-          "RoundedRectangle",
-          {
-            fill: normalItemFill,
-            stroke: "black",
-            strokeWidth: 2,
-          },
-          new go.Binding("stroke", "isHighlighted", function (h) {
-            return h ? "green" : "black";
-          }).ofObject(),
-          new go.Binding("strokeWidth", "isHighlighted", function (h) {
-            return h ? 4 : 2;
-          }).ofObject()
-        ),
-        new go.Binding("figure", "figure"),
-
-        $(
-          go.Panel,
-          "Table",
-          $(go.RowColumnDefinition, {
-            row: 0,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, {
-            row: 1,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, { row: 2, separatorStroke: "black" }),
-          $(go.RowColumnDefinition, {
-            row: 2,
-            column: 1,
-            separatorStroke: "black",
-            coversSeparators: false,
-          }),
-          $(go.RowColumnDefinition, {
-            row: 4,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, { row: 5, separatorStroke: "black" }),
-
-          $(go.RowColumnDefinition, { column: 0, separatorStroke: "black" }),
-          $(go.RowColumnDefinition, { column: 1, separatorStroke: "black" }),
-          $(go.RowColumnDefinition, {
-            column: 2,
-            separatorStroke: "black",
-          }),
-
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
-            {
-              editable: false,
-              row: 0,
-              column: 0,
-              columnSpan: 3,
-              margin: 5,
-              width: 125,
-              height: 75,
-              verticalAlignment: go.Spot.Left,
-              textAlign: "center",
-              font: "bold 13px sans-serif",
-            }
-          ),
-          $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: false,
-            row: 1,
-            column: 0,
-            columnSpan: 3,
-            margin: 5,
-            textAlign: "center",
-            font: "bold 13px sans-serif",
-          }),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 2,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 3,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
-            {
-              editable: false,
-              row: 2,
-              rowSpan: 2,
-              column: 2,
-              width: 25,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: false,
-            row: 4,
-            column: 0,
-            columnSpan: 3,
-            margin: 5,
-            textAlign: "center",
-            font: "bold 13px sans-serif",
-          }),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 5,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
-            {
-              editable: false,
-              textEditor: window.TextEditor,
-              row: 6,
-              column: 0,
-              columnSpan: 1,
-              width: 100,
-              margin: 5,
-              textAlign: "center",
-            }
-          ),
-          $(
-            go.TextBlock,
-            new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
-            {
-              editable: false,
-              row: 5,
-              rowSpan: 2,
-              column: 2,
-              width: 25,
-              margin: 5,
-              textAlign: "center",
-            }
-          )
-        ),
-        // four named ports, one on each side:
-        makePort("T", go.Spot.Top, go.Spot.TopSide, true, true),
-        makePort("L", go.Spot.Left, go.Spot.LeftSide, true, true),
-        makePort("R", go.Spot.Right, go.Spot.RightSide, true, true),
-        makePort("B", go.Spot.Bottom, go.Spot.BottomSide, true, true)
-      )
-    );
-
-    myDiagram.nodeTemplateMap.add(
-      "Top", // the default category
-      $(
-        go.Node,
-        go.Panel.Auto,
-        nodeStyle(),
-        { click: clickEvent },
-        // the main object is a Panel that surrounds a TextBlock with a rectangular Shape
-
-        $(
-          go.Shape,
-          "RoundedRectangle",
-          {
-            fill: normalItemFill,
-            stroke: "black",
-            strokeWidth: 2,
-          },
-          new go.Binding("stroke", "isHighlighted", function (h) {
-            return h ? "green" : "black";
-          }).ofObject(),
-          new go.Binding("strokeWidth", "isHighlighted", function (h) {
-            return h ? 4 : 2;
-          }).ofObject()
-        ),
-        new go.Binding("figure", "figure"),
-
-        $(
-          go.Panel,
-          "Table",
-          $(go.RowColumnDefinition, {
-            row: 0,
-            background: "white",
-          }),
-          $(go.RowColumnDefinition, {
-            row: 1,
-            background: "white",
-          }),
-          $(go.RowColumnDefinition, {
-            row: 2,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, { row: 3, separatorStroke: "black" }),
-          $(go.RowColumnDefinition, {
-            row: 4,
-            column: 1,
-            separatorStroke: "black",
-            coversSeparators: false,
-          }),
-          $(go.RowColumnDefinition, {
-            row: 5,
-            separatorStroke: "black",
-            background: "white",
-            coversSeparators: true,
-          }),
-          $(go.RowColumnDefinition, { row: 6, separatorStroke: "black" }),
-          $(go.TextBlock, new go.Binding("text", "key").makeTwoWay(), {
+          $(go.TextBlock, new go.Binding("text", "commCardNoDA").makeTwoWay(), {
+            editable: true,
             row: 0,
             column: 0,
             columnSpan: 3,
             margin: 5,
-            width: 125,
+            width: 175,
+            height: 25,
             verticalAlignment: go.Spot.Left,
             textAlign: "center",
-            font: "bold 13px sans-serif",
+            font: "bold 18px sans-serif",
           }),
 
           $(
             go.TextBlock,
             new go.Binding("text", "uuu_P6ActivityName").makeTwoWay(),
             {
-              editable: false,
+              editable: true,
               row: 1,
               column: 0,
               columnSpan: 3,
               margin: 5,
-              width: 125,
+              width: 175,
               height: 75,
               verticalAlignment: go.Spot.Left,
               textAlign: "center",
-              font: "bold 13px sans-serif",
+              font: "bold 24px sans-serif",
             }
           ),
           $(go.TextBlock, new go.Binding("text", "planDate").makeTwoWay(), {
-            editable: false,
+            editable: true,
+
             row: 2,
             column: 0,
             columnSpan: 3,
             margin: 5,
             textAlign: "center",
-            font: "bold 13px sans-serif",
+            font: "bold 18px sans-serif",
           }),
           $(
             go.TextBlock,
             new go.Binding("text", "ddd_evm_plan_start").makeTwoWay(),
             {
-              editable: false,
+              editable: true,
               textEditor: window.TextEditor,
               row: 3,
               column: 0,
-              columnSpan: 3,
+              columnSpan: 1,
+              width: 125,
               margin: 5,
               textAlign: "center",
+              font: "bold 18px sans-serif",
             }
           ),
-
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_plan_finish").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 4,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+              font: "bold 18px sans-serif",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "uuu_P6PlannedDuration").makeTwoWay(),
+            {
+              editable: true,
+              row: 3,
+              rowSpan: 2,
+              column: 2,
+              width: 50,
+              margin: 5,
+              textAlign: "center",
+              font: "bold 18px sans-serif",
+            }
+          ),
           $(go.TextBlock, new go.Binding("text", "actualDate").makeTwoWay(), {
-            editable: false,
-            row: 4,
+            editable: true,
+            row: 5,
             column: 0,
             columnSpan: 3,
             margin: 5,
             textAlign: "center",
-            font: "bold 13px sans-serif",
+            font: "bold 18px sans-serif",
           }),
           $(
             go.TextBlock,
             new go.Binding("text", "ddd_evm_actual_start").makeTwoWay(),
             {
-              editable: false,
+              editable: true,
               textEditor: window.TextEditor,
               row: 6,
               column: 0,
-              columnSpan: 3,
+              columnSpan: 1,
+              width: 125,
               margin: 5,
               textAlign: "center",
+              font: "bold 18px sans-serif",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "ddd_evm_actual_finish").makeTwoWay(),
+            {
+              editable: true,
+              textEditor: window.TextEditor,
+              row: 7,
+              column: 0,
+              columnSpan: 1,
+              width: 125,
+              margin: 5,
+              textAlign: "center",
+              font: "bold 18px sans-serif",
+            },
+            {
+              click: (e, node) => {
+                console.log(e);
+                console.log(node);
+              },
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "uuu_P6ActualDuration").makeTwoWay(),
+            {
+              editable: true,
+              row: 6,
+              rowSpan: 2,
+              column: 2,
+              width: 50,
+              margin: 5,
+              textAlign: "center",
+              font: "bold 18px sans-serif",
+            }
+          ),
+          $(
+            go.TextBlock,
+            new go.Binding("text", "commSeqLogicText").makeTwoWay(),
+            {
+              editable: true,
+              row: 8,
+              column: 0,
+              columnSpan: 3,
+              margin: 5,
+              height: 50,
+              verticalAlignment: go.Spot.Left,
+              textAlign: "center",
+              font: "bold 18px sans-serif",
             }
           )
         ),
@@ -911,7 +449,6 @@ const BlockView = () => {
 
     myDiagram.linkTemplate = $(
       go.Link, // the whole link panel
-      { click: linkClickEvent },
       {
         routing: go.Link.AvoidsNodes,
         curve: go.Link.JumpOver,
@@ -951,7 +488,7 @@ const BlockView = () => {
 
       $(
         go.Shape, // the arrowhead
-        { toArrow: "standard", strokeWidth: 0, fill: "gray" }
+        { toArrow: "standard", strokeWidth: 5, fill: "gray" }
       ),
       $(
         go.Panel,
@@ -1005,513 +542,213 @@ const BlockView = () => {
     return overview;
   }
 
-  const commissionFetch = async () => {
-    try {
-      const baseSet = {
-        class: "GraphLinksModel",
-        nodeDataArray: [],
-        linkDataArray: [],
-      };
-
-      const diagram = await diagramRef.current?.getDiagram();
-
-      const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
-
-      const comData = await fetchData.data.com;
-
-      // const topFetchData = await axios.get("/data/top.json");
-      // const topData = await topFetchData.data.data;
-      const topData = await fetchData.data.top;
-
-      await comData.forEach((com) => {
-        if (com.status !== "Deleted") {
-          if (com.dtsDashCoordinates !== null) {
-            baseSet.nodeDataArray.push({
-              key: com.uuu_P6ActivityId,
-              category: com.dtsPrioritySPD,
-              uuu_P6ActivityName: com.uuu_P6ActivityName,
-              planDate: "Plan Date",
-              ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
-                "MM-DD-YYYY"
-              ),
-              ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
-                "MM-DD-YYYY"
-              ),
-              uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
-              actualDate: "Actual Date",
-              ddd_evm_actual_start:
-                moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
-                  : null,
-              ddd_evm_actual_finish:
-                moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
-                  : null,
-              uuu_P6ActualDuration: com.uuu_P6ActualDuration,
-              loc: com.dtsDashCoordinates,
-              record_no: com.record_no,
-            });
-          } else {
-            baseSet.nodeDataArray.push({
-              key: com.uuu_P6ActivityId,
-              category: com.dtsPrioritySPD,
-              uuu_P6ActivityName: com.uuu_P6ActivityName,
-              planDate: "Plan Date",
-              ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
-                "MM-DD-YYYY"
-              ),
-              ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
-                "MM-DD-YYYY"
-              ),
-              uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
-              actualDate: "Actual Date",
-              ddd_evm_actual_start:
-                moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
-                  : null,
-              ddd_evm_actual_finish:
-                moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
-                  : null,
-              uuu_P6ActualDuration: com.uuu_P6ActualDuration,
-
-              record_no: com.record_no,
-            });
-          }
-        }
-      });
-
-      await comData.forEach((com) => {
-        if (com.status !== "Deleted") {
-          if (com._bp_lineitems !== undefined) {
-            if (com._bp_lineitems.length > 0) {
-              com._bp_lineitems.forEach((com2) => {
-                baseSet.linkDataArray.push({
-                  from: com.uuu_P6ActivityId,
-                  to: com2.dtsCommActivityBPK,
-                  points:
-                    com2.dtsDashCoordinates !== null
-                      ? com2.dtsDashCoordinates
-                          .split(",")
-                          .map((com) => Number(com))
-                      : null,
-                  dtsLineAutoSeq: com2.dtsLineAutoSeq,
-                });
-              });
-            }
-          }
-        }
-      });
-
-      await topData.forEach((com) => {
-        if (com.status !== "Deleted") {
-          if (com.dtsDashCoordinates !== null) {
-            baseSet.nodeDataArray.push({
-              key: com.dtsTOPCode,
-              category: "Top",
-              uuu_P6ActivityName: com.dtsTOPTitle,
-              planDate: "Plan Date",
-              ddd_evm_plan_start: moment(com.dtsPlanHODate).format(
-                "MM-DD-YYYY"
-              ),
-              actualDate: "Actual Date",
-              ddd_evm_actual_start:
-                moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
-                  : null,
-              loc: com.dtsDashCoordinates,
-              record_no: com.record_no,
-            });
-          } else {
-            baseSet.nodeDataArray.push({
-              key: com.dtsTOPCode,
-              category: "Top",
-              uuu_P6ActivityName: com.dtsTOPTitle,
-              planDate: "Plan Date",
-              ddd_evm_plan_start: moment(com.dtsPlanHODate).format(
-                "MM-DD-YYYY"
-              ),
-              actualDate: "Actual Date",
-              ddd_evm_actual_start:
-                moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
-                "Invalid date"
-                  ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
-                  : null,
-              record_no: com.record_no,
-            });
-          }
-        }
-      });
-
-      await topData.forEach((com) => {
-        if (com.status !== "Deleted") {
-          if (com._bp_lineitems !== undefined) {
-            com._bp_lineitems.forEach((com2) => {
-              baseSet.linkDataArray.push({
-                from: com.dtsTOPCode,
-                to: com2.uuu_P6ActivityId,
-                points:
-                  com2.dtsDashCoordinates !== null
-                    ? com2.dtsDashCoordinates
-                        .split(",")
-                        .map((com) => Number(com))
-                    : null,
-                dtsLineAutoSeq: com2.dtsLineAutoSeq,
-              });
-            });
-          }
-        }
-      });
-
-      setModalDate(baseSet);
-
-      // setTopOriginalData(topID);
-      diagram.model = go.Model.fromJson(JSON.stringify(baseSet));
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   useEffect(() => {
     setLoadModelData(true);
   }, []);
 
   useEffect(() => {
-    commissionFetch();
-  }, [params]);
+    const commissionFetch = async () => {
+      try {
+        const baseSet = {
+          class: "GraphLinksModel",
+          nodeDataArray: [],
+          linkDataArray: [],
+        };
 
-  const handleNodeClick = async (nodeData) => {
-    const baseSet = {
-      class: "GraphLinksModel",
-      nodeDataArray: [],
-      linkDataArray: [],
+        const diagram = await diagramRef.current?.getDiagram();
+
+        const fetchData = await axios.get(
+          `${Url}/blockInfo/${params.project_code}`
+        );
+
+        const comData = await fetchData.data.com;
+
+        await comData.forEach((com) => {
+          if (com.status !== "Deleted" || com.status !== "Terminated") {
+            if (com.dtsDashCoordinates !== null) {
+              baseSet.nodeDataArray.push({
+                key: com.uuu_P6ActivityId,
+                uuu_P6ActivityId: com.uuu_P6ActivityId,
+                category: "Low",
+                uuu_P6ActivityName: com.uuu_P6ActivityName,
+                planDate: "Plan Date",
+                ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
+                  "MM-DD-YYYY"
+                ),
+                ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
+                  "MM-DD-YYYY"
+                ),
+                uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
+                actualDate: "Actual Date",
+                ddd_evm_actual_start:
+                  moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
+                    : null,
+                ddd_evm_actual_finish:
+                  moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
+                    : null,
+                uuu_P6ActualDuration: com.uuu_P6ActualDuration,
+                uuu_bp_record_url: com.uuu_bp_record_url,
+                commSeqLogicText: com.commSeqLogicText,
+                loc: com.dtsDashCoordinates,
+                record_no: com.record_no,
+                commBlockTitleColorSPD:
+                  com.commBlockTitleColorSPD === null
+                    ? "white"
+                    : handleColor("title", com.commBlockTitleColorSPD),
+                commBlockColorSPD:
+                  com.commBlockColorSPD === null
+                    ? "white"
+                    : handleColor("block", com.commBlockColorSPD),
+                commBlockBorderColorSPD:
+                  com.commBlockBorderColorSPD === null
+                    ? "black"
+                    : handleColor("border", com.commBlockBorderColorSPD),
+                commCardNoDA: com.commCardNoDA,
+              });
+            } else {
+              baseSet.nodeDataArray.push({
+                key: com.uuu_P6ActivityId,
+                uuu_P6ActivityId: com.uuu_P6ActivityId,
+                category: "Low",
+                uuu_P6ActivityName: com.uuu_P6ActivityName,
+                planDate: "Plan Date",
+                ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
+                  "MM-DD-YYYY"
+                ),
+                ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
+                  "MM-DD-YYYY"
+                ),
+                uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
+                actualDate: "Actual Date",
+                ddd_evm_actual_start:
+                  moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
+                    : null,
+                ddd_evm_actual_finish:
+                  moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
+                  "Invalid date"
+                    ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
+                    : null,
+                uuu_P6ActualDuration: com.uuu_P6ActualDuration,
+                uuu_bp_record_url: com.uuu_bp_record_url,
+                commSeqLogicText: com.commSeqLogicText,
+                record_no: com.record_no,
+                commBlockTitleColorSPD:
+                  com.commBlockTitleColorSPD === null
+                    ? "white"
+                    : handleColor("title", com.commBlockTitleColorSPD),
+                commBlockColorSPD:
+                  com.commBlockColorSPD === null
+                    ? "white"
+                    : handleColor("block", com.commBlockColorSPD),
+                commBlockBorderColorSPD:
+                  com.commBlockBorderColorSPD === null
+                    ? "black"
+                    : handleColor("border", com.commBlockBorderColorSPD),
+                commCardNoDA: com.commCardNoDA,
+              });
+            }
+          }
+        });
+
+        await comData.forEach((com) => {
+          if (com.status !== "Deleted") {
+            if (com._bp_lineitems !== undefined) {
+              if (com._bp_lineitems.length > 0) {
+                com._bp_lineitems.forEach((com2) => {
+                  if (
+                    com2.uuu_tab_id === "Relationship" &&
+                    com2.dtsPredSuccSRB === "Successor"
+                  )
+                    baseSet.linkDataArray.push({
+                      from: com.uuu_P6ActivityId,
+                      to: com2.dtsCommActivityBPK,
+                      points:
+                        com2.dtsDashCoordinates !== null
+                          ? com2.dtsDashCoordinates
+                              .split(",")
+                              .map((com) => Number(com))
+                          : null,
+                      dtsLineAutoSeq: com2.dtsLineAutoSeq,
+                    });
+                });
+              }
+            }
+          }
+        });
+
+        diagram.model = go.Model.fromJson(JSON.stringify(baseSet));
+      } catch (err) {
+        console.log(err);
+      }
     };
 
-    const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
+    commissionFetch();
+  }, [params.project_code]);
 
-    const comData = await fetchData.data.com;
+  function myCallback(blob) {
+    var url = window.URL.createObjectURL(blob);
+    var filename = `${params.project_code}_block_diagram.png`;
 
-    // const topFetchData = await axios.get("/data/top.json");
-    // const topData = await topFetchData.data.data;
-    const topData = await fetchData.data.top;
+    var a = document.createElement("a");
+    a.style = "display: none";
+    a.href = url;
+    a.download = filename;
 
-    await comData.forEach((com) => {
-      if (com.status !== "Deleted") {
-        if (com.dtsDashCoordinates !== null) {
-          baseSet.nodeDataArray.push({
-            key: com.uuu_P6ActivityId,
-            category: com.dtsPrioritySPD,
-            uuu_P6ActivityName: com.uuu_P6ActivityName,
-            planDate: "Plan Date",
-            ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
-              "MM-DD-YYYY"
-            ),
-            ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
-              "MM-DD-YYYY"
-            ),
-            uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
-            actualDate: "Actual Date",
-            ddd_evm_actual_start:
-              moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
-              "Invalid date"
-                ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
-                : null,
-            ddd_evm_actual_finish:
-              moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
-              "Invalid date"
-                ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
-                : null,
-            uuu_P6ActualDuration: com.uuu_P6ActualDuration,
-            loc: com.dtsDashCoordinates,
-            record_no: com.record_no,
-          });
-        } else {
-          baseSet.nodeDataArray.push({
-            key: com.uuu_P6ActivityId,
-            category: com.dtsPrioritySPD,
-            uuu_P6ActivityName: com.uuu_P6ActivityName,
-            planDate: "Plan Date",
-            ddd_evm_plan_start: moment(com.ddd_evm_plan_start).format(
-              "MM-DD-YYYY"
-            ),
-            ddd_evm_plan_finish: moment(com.ddd_evm_plan_finish).format(
-              "MM-DD-YYYY"
-            ),
-            uuu_P6PlannedDuration: com.uuu_P6PlannedDuration,
-            actualDate: "Actual Date",
-            ddd_evm_actual_start:
-              moment(com.ddd_evm_actual_start).format("MM-DD-YYYY") !==
-              "Invalid date"
-                ? moment(com.ddd_evm_actual_start).format("MM-DD-YYYY")
-                : null,
-            ddd_evm_actual_finish:
-              moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY") !==
-              "Invalid date"
-                ? moment(com.ddd_evm_actual_finish).format("MM-DD-YYYY")
-                : null,
-            uuu_P6ActualDuration: com.uuu_P6ActualDuration,
+    // IE 11
+    if (window.navigator.msSaveBlob !== undefined) {
+      window.navigator.msSaveBlob(blob, filename);
+      return;
+    }
 
-            record_no: com.record_no,
-          });
-        }
-      }
+    document.body.appendChild(a);
+    requestAnimationFrame(() => {
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     });
+  }
 
-    await comData.forEach((com) => {
-      if (com.status !== "Deleted") {
-        if (com._bp_lineitems !== undefined) {
-          if (com._bp_lineitems.length > 0) {
-            com._bp_lineitems.forEach((com2) => {
-              baseSet.linkDataArray.push({
-                from: com.uuu_P6ActivityId,
-                to: com2.dtsCommActivityBPK,
-                points: com2.dtsDashCoordinates
-                  .split(",")
-                  .map((com) => Number(com)),
-                dtsLineAutoSeq: com2.dtsLineAutoSeq,
-              });
-            });
-          }
-        }
-      }
-    });
-
-    await topData.forEach((com) => {
-      if (com.status !== "Deleted") {
-        if (com.dtsDashCoordinates !== null) {
-          baseSet.nodeDataArray.push({
-            key: com.dtsTOPCode,
-            category: "Top",
-            uuu_P6ActivityName: com.dtsTOPTitle,
-            planDate: "Plan Date",
-            ddd_evm_plan_start: moment(com.dtsPlanHODate).format("MM-DD-YYYY"),
-            actualDate: "Actual Date",
-            ddd_evm_actual_start:
-              moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
-              "Invalid date"
-                ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
-                : null,
-            loc: com.dtsDashCoordinates,
-            record_no: com.record_no,
-          });
-        } else {
-          baseSet.nodeDataArray.push({
-            key: com.dtsTOPCode,
-            category: "Top",
-            uuu_P6ActivityName: com.dtsTOPTitle,
-            planDate: "Plan Date",
-            ddd_evm_plan_start: moment(com.dtsPlanHODate).format("MM-DD-YYYY"),
-            actualDate: "Actual Date",
-            ddd_evm_actual_start:
-              moment(com.dtsActualHODate).format("MM-DD-YYYY") !==
-              "Invalid date"
-                ? moment(com.dtsActualHODate).format("MM-DD-YYYY")
-                : null,
-            record_no: com.record_no,
-          });
-        }
-      }
-    });
-
-    await topData.forEach((com) => {
-      if (com.status !== "Deleted") {
-        if (com._bp_lineitems !== undefined) {
-          com._bp_lineitems.forEach((com2) => {
-            baseSet.linkDataArray.push({
-              from: com.dtsTOPCode,
-              to: com2.uuu_P6ActivityId,
-              points: com2.dtsDashCoordinates
-                .split(",")
-                .map((com) => Number(com)),
-              dtsLineAutoSeq: com2.dtsLineAutoSeq,
-            });
-          });
-        }
-      }
-    });
-
+  const exportAsImage = async () => {
     const diagram = diagramRef.current?.getDiagram();
 
-    const nowDiagramData = JSON.parse(diagram.model.toJson());
-
-    const successorLink = baseSet.linkDataArray.filter(
-      (com) => com.from === nodeData.key
-    );
-
-    const predecessorLink = baseSet.linkDataArray.filter(
-      (com) => com.to === nodeData.key
-    );
-
-    const nodeItem = [];
-    const linkItem = successorLink.concat(predecessorLink);
-
-    successorLink.forEach((com) => {
-      baseSet.nodeDataArray.forEach((com2) => {
-        if (com.to === com2.key) {
-          nodeItem.push(com2);
-        }
-      });
+    diagram.makeImageData({
+      background: "white",
+      returnType: "blob",
+      callback: myCallback,
     });
-
-    predecessorLink.forEach((com) => {
-      baseSet.nodeDataArray.forEach((com2) => {
-        if (com.from === com2.key) {
-          nodeItem.push(com2);
-        }
-      });
-    });
-
-    const finalNode = nodeItem.filter(
-      (x) =>
-        !JSON.stringify(nowDiagramData.nodeDataArray).includes(
-          JSON.stringify(x)
-        )
-    );
-
-    const finalLink = linkItem.filter(
-      (x) =>
-        !JSON.stringify(nowDiagramData.linkDataArray).includes(
-          JSON.stringify(x)
-        )
-    );
-
-    nowDiagramData.nodeDataArray =
-      nowDiagramData.nodeDataArray.concat(finalNode);
-
-    const linkData = nowDiagramData.linkDataArray.concat(finalLink);
-
-    const finalLinkData = linkData.filter((item, i) => {
-      return (
-        linkData.findIndex((item2, j) => {
-          return item.to === item2.to && item.from === item2.from;
-        }) === i
-      );
-    });
-
-    nowDiagramData.linkDataArray = finalLinkData;
-
-    console.log(linkItem);
-    console.log(linkData);
-    console.log(finalLinkData);
-    console.log(nowDiagramData);
-
-    if (
-      finalNode.length > 0 ||
-      finalLinkData.length !== nowDiagramData.linkDataArray.length
-    ) {
-      diagram.model = go.Model.fromJson(JSON.stringify(nowDiagramData));
-    }
-  };
-
-  const filterNodeData = (cate) => {
-    const diagram = diagramRef.current?.getDiagram();
-
-    if (cate === "reset") {
-      diagram.model = go.Model.fromJson(JSON.stringify(modelData));
-    } else {
-      let filteringModel = { ...modelData };
-      const filterNodeDataArray = modelData.nodeDataArray.filter((com) => {
-        return com.category === cate;
-      });
-
-      filteringModel.nodeDataArray = filterNodeDataArray;
-
-      const linkFilterArray = modelData.nodeDataArray.filter((com) => {
-        return com.category !== cate;
-      });
-
-      const test0 = linkFilterArray.map((com) => com.key);
-
-      const test1 = modelData.linkDataArray.filter((com) => {
-        return test0.some((com2) => {
-          return com.to === com2;
-        });
-      });
-
-      const test2 = modelData.linkDataArray.filter((com) => {
-        return test0.some((com2) => {
-          return com.from === com2;
-        });
-      });
-
-      const totalTest = [];
-
-      test1.map((com) => {
-        return totalTest.push(com);
-      });
-
-      test2.map((com) => {
-        return totalTest.push(com);
-      });
-
-      const totalTestResult = [...new Set(totalTest)];
-
-      const linkDataArrayResult = [...modelData.linkDataArray].filter(
-        (com) => !totalTestResult.includes(com)
-      );
-
-      filteringModel.linkDataArray = linkDataArrayResult;
-
-      diagram.model = go.Model.fromJson(JSON.stringify(filteringModel));
-    }
   };
 
   return (
     <>
       <div className="blockInsert">
-        <ReactDiagram
-          ref={diagramRef}
-          initDiagram={initDiagram}
-          divClassName="diagram-component"
-        />
-        <ReactOverview
-          initOverview={initOverview}
-          divClassName="overview-component"
-          observedDiagram={
-            (loadModelData && diagramRef.current?.getDiagram()) || null
-          }
-        />
+        <div style={{ width, height: height - 33 - 32 }}>
+          <ReactDiagram
+            ref={diagramRef}
+            initDiagram={initDiagram}
+            divClassName="diagram-component"
+          />
+          <ReactOverview
+            initOverview={initOverview}
+            divClassName="overview-component"
+            observedDiagram={
+              (loadModelData && diagramRef.current?.getDiagram()) || null
+            }
+          />
+        </div>
 
         <div className="controlButtonBox">
           <button
             onClick={() => {
-              filterNodeData("High");
+              exportAsImage();
             }}
           >
-            High
-          </button>
-          <button
-            onClick={() => {
-              filterNodeData("Medium");
-            }}
-          >
-            Medium
-          </button>
-          <button
-            onClick={() => {
-              filterNodeData("Low");
-            }}
-          >
-            Low
-          </button>
-          <button
-            onClick={() => {
-              filterNodeData("Top");
-            }}
-          >
-            TOP
-          </button>
-          <button
-            onClick={() => {
-              filterNodeData("reset");
-            }}
-          >
-            Reset
+            이미지 저장
           </button>
         </div>
       </div>
@@ -1521,98 +758,27 @@ const BlockView = () => {
 
 export default BlockView;
 
-// <button id="SaveButton" className="saveButton" onClick={save}>
-//           Save
-//         </button>
-//         <button className="loadButton" onClick={load}>
-//           Load
-//         </button>
-//         <button id="FirstButton" name="first" onClick={filtering}>
-//           First
-//         </button>
-//         <button id="SecondButton" name="second" onClick={filtering}>
-//           Second
-//         </button>
-//         <button id="ThirdButton" name="third" onClick={filtering}>
-//           Third
-//         </button>
-//         <button id="ResetButton" name="reset" onClick={filtering}>
-//           Reset
-//         </button>
+const colorList = [
+  { name: "RED", color: "rgb(255, 50, 0)" },
+  { name: "GREEN", color: "rgb(0, 200, 100)" },
+  { name: "BLUE", color: "rgb(100, 150, 250)" },
+  { name: "ORANGE", color: "rgb(255, 200, 0)" },
+  { name: "PINK", color: "rgb(255, 230, 220)" },
+  { name: "YELLOW", color: "rgb(255, 255, 200)" },
+  { name: "BLACK", color: "rgb(0, 0, 0)" },
+  { name: "WHITE", color: "rgb(255, 255, 255)" },
+];
 
-// const [modelData, setModalDate] = useState({
-//   class: "GraphLinksModel",
-//   nodeDataArray: [],
-//   linkDataArray: [],
-// });
+const handleColor = (type, colorName) => {
+  const color_result = colorList.find((com) => com.name === colorName);
 
-// const save = () => {
-//   const diagram = diagramRef.current?.getDiagram();
-
-//   setModalDate({
-//     ...modelData,
-//     nodeDataArray: JSON.parse(diagram.model.toJson()).nodeDataArray,
-//     linkDataArray: JSON.parse(diagram.model.toJson()).linkDataArray,
-//   });
-//   diagram.isModified = false;
-
-//   console.log(JSON.parse(diagram.model.toJson()));
-// };
-
-// const load = () => {
-//   const diagram = diagramRef.current?.getDiagram();
-//   diagram.model = go.Model.fromJson(JSON.stringify(modelData));
-// };
-
-// const filtering = (e) => {
-//   const diagram = diagramRef.current?.getDiagram();
-
-//   if (e.target.name === "reset") {
-//     diagram.model = go.Model.fromJson(JSON.stringify(modelData));
-//   } else {
-//     let filteringModel = { ...modelData };
-//     const filterNodeDataArray = modelData.nodeDataArray.filter((com) => {
-//       return com.category === e.target.name;
-//     });
-
-//     filteringModel.nodeDataArray = filterNodeDataArray;
-
-//     const linkFilterArray = modelData.nodeDataArray.filter((com) => {
-//       return com.category !== e.target.name;
-//     });
-
-//     const test0 = linkFilterArray.map((com) => com.key);
-
-//     const test1 = modelData.linkDataArray.filter((com) => {
-//       return test0.some((com2) => {
-//         return com.to === com2;
-//       });
-//     });
-
-//     const test2 = modelData.linkDataArray.filter((com) => {
-//       return test0.some((com2) => {
-//         return com.from === com2;
-//       });
-//     });
-
-//     const totalTest = [];
-
-//     test1.map((com) => {
-//       return totalTest.push(com);
-//     });
-
-//     test2.map((com) => {
-//       return totalTest.push(com);
-//     });
-
-//     const totalTestResult = [...new Set(totalTest)];
-
-//     const linkDataArrayResult = [...modelData.linkDataArray].filter(
-//       (com) => !totalTestResult.includes(com)
-//     );
-
-//     filteringModel.linkDataArray = linkDataArrayResult;
-
-//     diagram.model = go.Model.fromJson(JSON.stringify(filteringModel));
-//   }
-// };
+  if (type === "border") {
+    return color_result?.["color"] === undefined
+      ? "black"
+      : color_result?.["color"];
+  } else {
+    return color_result?.["color"] === undefined
+      ? "white"
+      : color_result?.["color"];
+  }
+};

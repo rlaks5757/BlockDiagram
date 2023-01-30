@@ -73,6 +73,9 @@ const ComCardInsert = ({
   return (
     <div className="blockInsertModalInsertBox">
       <div className="blockInsertModalSample">
+        <div className="lockInsertModalSampleKey">
+          {insertData.commCardNoDA}
+        </div>
         <div className="blockInsertModalSampleTitle">
           {insertData.uuu_P6ActivityName}
         </div>
@@ -134,6 +137,9 @@ const ComCardInsert = ({
             {insertData.uuu_P6ActualDuration}
           </div>
         </div>
+        <div className="blockInsertModalSampleLogic">
+          {insertData.commSeqLogicText}
+        </div>
       </div>
       <div className="blockDataInsertBox">
         <div className="blockDataInsert">
@@ -147,58 +153,88 @@ const ComCardInsert = ({
             onBlur={handleCheck}
           />
         </div>
+        <div className="blockDateBox">
+          <div
+            className="blockDataInsert"
+            style={{ width: "50%", marginRight: "15px" }}
+          >
+            <div>*Card No: </div>
+            <Input
+              type="number"
+              name="commCardNoDA"
+              onChange={(e) => {
+                handleInsertData(e);
+              }}
+              value={insertData.commCardNoDA}
+              onBlur={handleCheck}
+            />
+          </div>
 
+          <div className="blockDataInsert" style={{ width: "50%" }}>
+            <div>*Card Title: </div>
+            <Input
+              type="text"
+              name="uuu_P6ActivityName"
+              onChange={handleInsertData}
+              value={insertData.uuu_P6ActivityName}
+            />
+          </div>
+        </div>
+        <div className="blockDateBox">
+          <div className="blockDataInsert" style={{ marginRight: "15px" }}>
+            <div>*Plan Date Start: </div>
+            <DatePicker
+              value={
+                insertData.ddd_evm_plan_start !== ""
+                  ? new Date(insertData.ddd_evm_plan_start)
+                  : ""
+              }
+              onChange={(e) => handleDateFicker(e, "ddd_evm_plan_start")}
+            />
+          </div>
+          <div className="blockDataInsert">
+            <div>*Plan Date Finish: </div>
+            <DatePicker
+              value={
+                insertData.ddd_evm_plan_finish !== ""
+                  ? new Date(insertData.ddd_evm_plan_finish)
+                  : ""
+              }
+              onChange={(e) => handleDateFicker(e, "ddd_evm_plan_finish")}
+            />
+          </div>
+        </div>
+        <div className="blockDateBox">
+          <div className="blockDataInsert" style={{ marginRight: "15px" }}>
+            <div>Actual Date Start: </div>
+            <DatePicker
+              value={
+                insertData.ddd_evm_actual_start !== ""
+                  ? new Date(insertData.ddd_evm_actual_start)
+                  : ""
+              }
+              onChange={(e) => handleDateFicker(e, "ddd_evm_actual_start")}
+            />
+          </div>
+          <div className="blockDataInsert">
+            <div>Actual Date Finish: </div>
+            <DatePicker
+              value={
+                insertData.ddd_evm_actual_finish !== ""
+                  ? new Date(insertData.ddd_evm_actual_finish)
+                  : ""
+              }
+              onChange={(e) => handleDateFicker(e, "ddd_evm_actual_finish")}
+            />
+          </div>
+        </div>
         <div className="blockDataInsert">
-          <div>*Card Title: </div>
+          <div>*Card SeqLogic: </div>
           <Input
             type="text"
-            name="uuu_P6ActivityName"
+            name="commSeqLogicText"
             onChange={handleInsertData}
-            value={insertData.uuu_P6ActivityName}
-          />
-        </div>
-        <div className="blockDataInsert">
-          <div>*Plan Date Start: </div>
-          <DatePicker
-            value={
-              insertData.ddd_evm_plan_start !== ""
-                ? new Date(insertData.ddd_evm_plan_start)
-                : ""
-            }
-            onChange={(e) => handleDateFicker(e, "ddd_evm_plan_start")}
-          />
-        </div>
-        <div className="blockDataInsert">
-          <div>*Plan Date Finish: </div>
-          <DatePicker
-            value={
-              insertData.ddd_evm_plan_finish !== ""
-                ? new Date(insertData.ddd_evm_plan_finish)
-                : ""
-            }
-            onChange={(e) => handleDateFicker(e, "ddd_evm_plan_finish")}
-          />
-        </div>
-        <div className="blockDataInsert">
-          <div>Actual Date Start: </div>
-          <DatePicker
-            value={
-              insertData.ddd_evm_actual_start !== ""
-                ? new Date(insertData.ddd_evm_actual_start)
-                : ""
-            }
-            onChange={(e) => handleDateFicker(e, "ddd_evm_actual_start")}
-          />
-        </div>
-        <div className="blockDataInsert">
-          <div>Actual Date Finish: </div>
-          <DatePicker
-            value={
-              insertData.ddd_evm_actual_finish !== ""
-                ? new Date(insertData.ddd_evm_actual_finish)
-                : ""
-            }
-            onChange={(e) => handleDateFicker(e, "ddd_evm_actual_finish")}
+            value={insertData.commSeqLogicText}
           />
         </div>
       </div>

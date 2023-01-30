@@ -17,15 +17,15 @@ const TotalLayOut = () => {
       <TabStripTab title="Flow-Diagram">
         <BlockView />
       </TabStripTab>
-      <TabStripTab title="Commissioning S-Curve">
+      <TabStripTab title="S-Curve">
         <SCurveChart />
       </TabStripTab>
-      <TabStripTab title="Flow-Diagram Table">
+      <TabStripTab title="Activity List">
         <KendoTable />
       </TabStripTab>
-      <TabStripTab title="Flow-Diagram Insert">
+      {/* <TabStripTab title="Commissioning Flow-Diagram Insert">
         <BlockInsert />
-      </TabStripTab>
+      </TabStripTab> */}
     </TabStrip>
   );
 };

@@ -10,8 +10,13 @@
     width: 100%;
   }
 
+  .blockDateBox {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .blockInsertModalInsertBox {
-    width: 250px;
+    width: 500px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -26,6 +31,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        border-bottom: 1px solid black;
         height: 25px;
       }
 
@@ -77,6 +83,14 @@
         align-items: center;
         justify-content: center;
         height: 25px;
+      }
+
+      .blockInsertModalSampleLogic {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-top: 1px solid black;
+        height: 50px;
       }
     }
   }

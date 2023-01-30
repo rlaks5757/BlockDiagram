@@ -1,7 +1,6 @@
 .sCurveTable {
-  margin-top: 30px;
-  width: 100%;
   border: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: scroll;
 
   .sCurveTableHeader {
     display: flex;
@@ -17,8 +16,6 @@
       align-items: center;
       text-align: center;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
   }
 
@@ -37,5 +34,26 @@
         border: 1px solid rgba(0, 0, 0, 0.08);
       }
     }
+  }
+}
+
+.sCurveTable {
+  .k-grouping-header.k-grouping-header-flex {
+    display: none !important;
+  }
+
+  .k-grid-header .k-cell-inner {
+    font-weight: bold;
+    justify-content: center;
+  }
+
+  .k-grid-header col:nth-of-type(1) {
+    width: 10%;
+  }
+  .k-grid-table col:nth-of-type(1) {
+    width: 10%;
+  }
+  .k-grid-footer col:nth-of-type(1) {
+    width: 10%;
   }
 }
