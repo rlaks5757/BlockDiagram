@@ -1,0 +1,190 @@
+[
+  {
+    "uuu_P6ActivityId": "KIMAN007123",
+    "uuu_P6ActivityName": "TEST Card",
+    "ddd_evm_plan_start": "12-06-2022 00:00:00",
+    "ddd_evm_plan_finish": "12-09-2022 00:00:00",
+    "uuu_P6PlannedDuration": 4,
+    "ddd_evm_actual_start": " ",
+    "ddd_evm_actual_finish": " ",
+    "uuu_P6ActualDuration": 0,
+    "status": "Not_Started",
+    "dtsDashCoordinates": "200 -100",
+    "dtsPrioritySPD": "Low",
+    "record_no": "CMA-0001",
+    "commSeqLogicText": null,
+    "commCardNoDA": 123,
+    "_bp_lineitems": [
+      {
+        "dtsPredSuccSRB": "Successor",
+        "dtsCommActivityBPK": "003",
+        "dtsDashCoordinates": "301.76142374915395,-100.00000000000003,311.76142374915395,-100.00000000000003,349.5,-100.00000000000003,349.5,-99.99999999999994,387.23857625084605,-99.99999999999994,397.23857625084605,-99.99999999999994",
+        "uuu_P6ActivityName": "test 3",
+        "dtsLineAutoSeq": "0030",
+        "short_desc": "1"
+      },
+      {
+        "dtsPredSuccSRB": "Successor",
+        "dtsCommActivityBPK": "005",
+        "dtsDashCoordinates": "200,85.94000803870478,200,95.94000803870478,200,149.5,200,149.5,200,203.05999196129525,200,213.05999196129525",
+        "uuu_P6ActivityName": "test",
+        "dtsLineAutoSeq": "0031",
+        "short_desc": "1"
+      },
+      {
+        "dtsPredSuccSRB": "Predecessor",
+        "dtsCommActivityBPK": "KIMAN007111",
+        "dtsDashCoordinates": "2.761423749153977,-100.00000000000003,12.761423749153977,-100.00000000000003,50.50000000000001,-100.00000000000003,50.50000000000001,-99.99999999999994,88.23857625084604,-99.99999999999994,98.23857625084604,-99.99999999999994",
+        "uuu_P6ActivityName": "TEST",
+        "dtsLineAutoSeq": "0017",
+        "short_desc": "1"
+      }
+    ]
+  },
+  {
+    "uuu_P6ActivityId": "KIMAN007111",
+    "uuu_P6ActivityName": "TEST",
+    "ddd_evm_plan_start": "12-04-2022 00:00:00",
+    "ddd_evm_plan_finish": "12-05-2022 00:00:00",
+    "uuu_P6PlannedDuration": 2,
+    "ddd_evm_actual_start": " ",
+    "ddd_evm_actual_finish": " ",
+    "uuu_P6ActualDuration": 0,
+    "status": "Not_Started",
+    "dtsDashCoordinates": "-100 -100",
+    "dtsPrioritySPD": "Low",
+    "record_no": "CMA-0002",
+    "commSeqLogicText": null,
+    "commCardNoDA": 0,
+    "_bp_lineitems": [
+      {
+        "dtsPredSuccSRB": "Successor",
+        "dtsCommActivityBPK": "KIMAN007123",
+        "dtsDashCoordinates": "2.761423749153977,-100.00000000000003,12.761423749153977,-100.00000000000003,50.50000000000001,-100.00000000000003,50.50000000000001,-99.99999999999994,88.23857625084604,-99.99999999999994,98.23857625084604,-99.99999999999994",
+        "uuu_P6ActivityName": "TEST Card",
+        "dtsLineAutoSeq": "0017",
+        "short_desc": "1"
+      }
+    ]
+  },
+  {
+    "uuu_P6ActivityId": "003",
+    "uuu_P6ActivityName": "test 3",
+    "ddd_evm_plan_start": "01-16-2023 00:00:00",
+    "ddd_evm_plan_finish": "01-20-2023 00:00:00",
+    "uuu_P6PlannedDuration": 5,
+    "ddd_evm_actual_start": "01-17-2023 00:00:00",
+    "ddd_evm_actual_finish": " ",
+    "uuu_P6ActualDuration": 1,
+    "status": "In_Progress",
+    "dtsDashCoordinates": "500 -100",
+    "dtsPrioritySPD": "Low",
+    "record_no": "CMA-0003",
+    "commSeqLogicText": null,
+    "commCardNoDA": 0,
+    "_bp_lineitems": [
+      {
+        "dtsPredSuccSRB": "Predecessor",
+        "dtsCommActivityBPK": "KIMAN007123",
+        "dtsDashCoordinates": "301.76142374915395,-100.00000000000003,311.76142374915395,-100.00000000000003,349.5,-100.00000000000003,349.5,-99.99999999999994,387.23857625084605,-99.99999999999994,397.23857625084605,-99.99999999999994",
+        "uuu_P6ActivityName": "TEST Card",
+        "dtsLineAutoSeq": "0030",
+        "short_desc": "1"
+      }
+    ]
+  },
+  {
+    "uuu_P6ActivityId": "004",
+    "uuu_P6ActivityName": "test",
+    "ddd_evm_plan_start": "01-27-2023 00:00:00",
+    "ddd_evm_plan_finish": "01-28-2023 00:00:00",
+    "uuu_P6PlannedDuration": 2,
+    "ddd_evm_actual_start": " ",
+    "ddd_evm_actual_finish": " ",
+    "uuu_P6ActualDuration": 0,
+    "status": "Not_Started",
+    "dtsDashCoordinates": "-100 400",
+    "dtsPrioritySPD": "Low",
+    "record_no": "CMA-0004",
+    "commSeqLogicText": "123",
+    "commCardNoDA": 1,
+    "_bp_lineitems": [
+      {
+        "dtsPredSuccSRB": "Successor",
+        "dtsCommActivityBPK": "005",
+        "dtsDashCoordinates": "1.7614237491539768,399.99999999999994,11.761423749153977,399.99999999999994,49.50000000000001,399.99999999999994,49.50000000000001,400,87.23857625084604,400,97.23857625084604,400",
+        "uuu_P6ActivityName": "test",
+        "dtsLineAutoSeq": "0012",
+        "short_desc": "1"
+      }
+    ]
+  },
+  {
+    "uuu_P6ActivityId": "005",
+    "uuu_P6ActivityName": "test",
+    "ddd_evm_plan_start": "01-27-2023 00:00:00",
+    "ddd_evm_plan_finish": "01-27-2023 00:00:00",
+    "uuu_P6PlannedDuration": 1,
+    "ddd_evm_actual_start": " ",
+    "ddd_evm_actual_finish": " ",
+    "uuu_P6ActualDuration": 0,
+    "status": "Not_Started",
+    "dtsDashCoordinates": "200 400",
+    "dtsPrioritySPD": "Low",
+    "record_no": "CMA-0005",
+    "commSeqLogicText": null,
+    "commCardNoDA": 1,
+    "_bp_lineitems": [
+      {
+        "dtsPredSuccSRB": "Predecessor",
+        "dtsCommActivityBPK": "KIMAN007123",
+        "dtsDashCoordinates": "200,85.94000803870478,200,95.94000803870478,200,149.5,200,149.5,200,203.05999196129525,200,213.05999196129525",
+        "uuu_P6ActivityName": "TEST Card",
+        "dtsLineAutoSeq": "0031",
+        "short_desc": "1"
+      },
+      {
+        "dtsPredSuccSRB": "Predecessor",
+        "dtsCommActivityBPK": "004",
+        "dtsDashCoordinates": "1.7614237491539768,399.99999999999994,11.761423749153977,399.99999999999994,49.50000000000001,399.99999999999994,49.50000000000001,400,87.23857625084604,400,97.23857625084604,400",
+        "uuu_P6ActivityName": "test",
+        "dtsLineAutoSeq": "0012",
+        "short_desc": "1"
+      },
+      {
+        "dtsPredSuccSRB": "Successor",
+        "dtsCommActivityBPK": "006",
+        "dtsDashCoordinates": "302.76142374915395,399.99999999999994,312.76142374915395,399.99999999999994,350.5,399.99999999999994,350.5,400,388.23857625084605,400,398.23857625084605,400",
+        "uuu_P6ActivityName": "test",
+        "dtsLineAutoSeq": "0016",
+        "short_desc": "1"
+      }
+    ]
+  },
+  {
+    "uuu_P6ActivityId": "006",
+    "uuu_P6ActivityName": "test",
+    "ddd_evm_plan_start": "01-27-2023 00:00:00",
+    "ddd_evm_plan_finish": "01-27-2023 00:00:00",
+    "uuu_P6PlannedDuration": 1,
+    "ddd_evm_actual_start": " ",
+    "ddd_evm_actual_finish": " ",
+    "uuu_P6ActualDuration": 0,
+    "status": "Not_Started",
+    "dtsDashCoordinates": "500 400",
+    "dtsPrioritySPD": "Low",
+    "record_no": "CMA-0006",
+    "commSeqLogicText": null,
+    "commCardNoDA": 1,
+    "_bp_lineitems": [
+      {
+        "dtsPredSuccSRB": "Predecessor",
+        "dtsCommActivityBPK": "005",
+        "dtsDashCoordinates": "302.76142374915395,399.99999999999994,312.76142374915395,399.99999999999994,350.5,399.99999999999994,350.5,400,388.23857625084605,400,398.23857625084605,400",
+        "uuu_P6ActivityName": "test",
+        "dtsLineAutoSeq": "0016",
+        "short_desc": "1"
+      }
+    ]
+  }
+]

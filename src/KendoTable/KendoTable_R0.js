@@ -43,9 +43,7 @@ const KendoTable = () => {
     const dataFetch = async () => {
       const tableDataSet = [];
 
-      const fetchData = await axios.get(
-        `${Url}/blockInfo/${params.project_code}`
-      );
+      const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
 
       const tableData = fetchData.data;
 
@@ -95,12 +93,43 @@ const KendoTable = () => {
         }
       });
 
+      tableData.top.forEach((com) => {
+        if (com.status !== "Deleted") {
+          tableDataSet.push({
+            Category:
+              com.dtsDashBlockCategory === "TOP"
+                ? "Turn-Over Packages"
+                : "Commissioning Activity",
+            Activity_ID: com.dtsTOPCode,
+            Activity_Name: com.dtsTOPTitle,
+            Plan_Start_Date: new Date(com.dtsPlanHODate),
+            Plan_Finish_Date: null,
+            Plan_Duration: 0,
+            Actual_Start_Date:
+              com.dtsActualHODate !== null ? new Date(com.dtsActualHODate) : "",
+            Actual_Finish_Date: null,
+            Actual_Duration: 0,
+            Relationship:
+              com._bp_lineitems !== undefined
+                ? com._bp_lineitems.map((com2) => {
+                    return {
+                      Activity_ID: com2.dtsCommActivityBPK,
+                      Activity_Name: com2.uuu_P6ActivityName,
+                    };
+                  })
+                : null,
+            Importance: null,
+            Status: com.status,
+          });
+        }
+      });
+
       setCustomTableData(tableDataSet);
       setDataResult(process(tableDataSet, dataState));
     };
 
     dataFetch();
-  }, [dataState, params.project_code]);
+  }, [dataState, params.id]);
 
   return (
     <>

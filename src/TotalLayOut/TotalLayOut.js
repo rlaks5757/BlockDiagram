@@ -14,18 +14,18 @@ const TotalLayOut = () => {
 
   return (
     <TabStrip selected={selected} onSelect={handleSelect}>
-      <TabStripTab title="Commissioning Flow-Diagram">
+      <TabStripTab title="Flow-Diagram">
         <BlockView />
       </TabStripTab>
-      <TabStripTab title="Commissioning S-Curve">
+      <TabStripTab title="S-Curve">
         <SCurveChart />
       </TabStripTab>
-      <TabStripTab title="Commissioning Table">
+      <TabStripTab title="Activity List">
         <KendoTable />
       </TabStripTab>
-      <TabStripTab title="Commissioning Flow-Diagram Insert">
+      {/* <TabStripTab title="Commissioning Flow-Diagram Insert">
         <BlockInsert />
-      </TabStripTab>
+      </TabStripTab> */}
     </TabStrip>
   );
 };

@@ -30,12 +30,14 @@ const SCurveChart = () => {
     categories: [],
     series: [],
   });
-
+  console.log(chartData);
   const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
     const commissionFetch = async () => {
-      const fetchData = await axios.get(`${Url}/blockInfo/${params.id}`);
+      const fetchData = await axios.get(
+        `${Url}/blockInfo/${params.project_code}`
+      );
 
       const filteringData = fetchData.data.com.filter(
         (com) => com.status !== "Deleted"
@@ -193,7 +195,7 @@ const SCurveChart = () => {
     };
 
     commissionFetch();
-  }, [params]);
+  }, [params.project_code]);
 
   const tableContent = (com, com1) => {
     if (com.field === "diff") {
